@@ -9,6 +9,10 @@ import CreateClient from "./pages/clients/create-client";
 import DetailsClient from "./pages/clients/details-client";
 import { NotFoud } from "./pages/_layouts/404";
 import EditClient from "./pages/clients/edit-client";
+import { Products } from "./pages/products/products";
+import { NewProduct } from "./pages/products/new-product";
+import { DetailsProduct } from "./pages/products/details-product";
+import { EditProduct } from "./pages/products/edit-product";
 
 const checkAuth = () => {
   const token = localStorage.getItem("modular-token");
@@ -42,6 +46,10 @@ export const router = createBrowserRouter([
       { path: "/clients/create", element: <CreateClient /> },
       { path: "/clients/:id", element: <DetailsClient /> },
       { path: "/clients/:id/edit", element: <EditClient /> },
+      { path: "/products", element: <Products /> },
+      { path: "/products/create", element: <NewProduct /> },
+      { path: "/products/:id", element: <DetailsProduct /> },
+      { path: "/products/:id/edit", element: <EditProduct /> },
     ],
   },
   {
