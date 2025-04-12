@@ -13,6 +13,10 @@ import { Products } from "./pages/products/products";
 import { NewProduct } from "./pages/products/new-product";
 import { DetailsProduct } from "./pages/products/details-product";
 import { EditProduct } from "./pages/products/edit-product";
+import UserList from "./pages/users/users";
+import CreateUser from "./pages/users/create-user";
+import { Register } from "./pages/auth/register";
+import { DetailsUser } from "./pages/users/details-user";
 
 const checkAuth = () => {
   const token = localStorage.getItem("modular-token");
@@ -50,6 +54,10 @@ export const router = createBrowserRouter([
       { path: "/products/create", element: <NewProduct /> },
       { path: "/products/:id", element: <DetailsProduct /> },
       { path: "/products/:id/edit", element: <EditProduct /> },
+      { path: "/users", element: <UserList /> },
+      { path: "/users/create", element: <CreateUser /> },
+      { path: "/users/:id/edit", element: <CreateUser /> },
+      { path: "/users/:id", element: <DetailsUser /> },
     ],
   },
   {
@@ -59,6 +67,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/sign-in", element: <SignIn /> },
       { path: "/reset-password", element: <ResetPassword /> },
+      { path: "/register/:code", element: <Register /> },
     ],
   },
   {

@@ -1,4 +1,3 @@
-import { productApi } from "@/api";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,53 +19,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ProductResponse } from "@/models/responses/product-response";
-import { useEffect, useState } from "react";
+import { UserResponse } from "@/models/responses/user-response";
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link, useNavigate, useParams } from "react-router-dom";
-import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
-export function DetailsProduct() {
+export function DetailsUser() {
   const [loading, setLoading] = useState(false);
-  const [product, setProduct] = useState<ProductResponse>();
-  const { id } = useParams();
+  const [user, setUser] = useState<UserResponse | null>();
 
-  const navigate = useNavigate();
-
-  const getProductDetails = () => {
-    setLoading(true);
-    productApi
-      .getDetails(Number(id))
-      .then((response) => {
-        setProduct(response.data.product);
-        console.log(response.data);
-      })
-      .catch((e) => {
-        if (e.status === 404) {
-          toast.error("Produto não encontrado na base de dados");
-          navigate("/404");
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  const destroyProduct = async () => {
-    productApi
-      .destroy(product!.id)
-      .then(() => {
-        navigate("/products");
-        toast("Produto deletado com sucesso");
-      })
-      .catch(() => {
-        toast("Erro ao deletar o produto");
-      });
-  };
-
-  useEffect(() => {
-    getProductDetails();
-  }, []);
+  const destroyProduct = () => {};
 
   return (
     <>
@@ -74,57 +36,61 @@ export function DetailsProduct() {
         <span>...Carregando</span>
       ) : (
         <>
-          <Helmet title="Produtos|Detalhe Do Produto" />
+          <Helmet title="Usuários|Detalhe Do Usuário" />
           <Card>
             <CardHeader>
-              <CardTitle>Cadastro de produto</CardTitle>
-              <CardDescription>Cadastrar novo produto</CardDescription>
+              <CardTitle>Detalhes do Usuário</CardTitle>
+              <CardDescription>Detalhes completos do usuário</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
                 <div className="flex gap-4">
                   <div className="grid flex-1 items-center gap-1.5">
-                    <Label htmlFor="name">Nome do produto</Label>
+                    <Label htmlFor="name">Nome do usuário</Label>
                     <Input
                       type="text"
                       id="name"
                       className="w-full"
                       disabled
-                      value={product?.name}
+                      value={user?.fullName}
                     />
                   </div>
                   <div className="grid flex-1 items-center gap-1.5">
-                    <Label htmlFor="name">Fabricante</Label>
+                    <Label htmlFor="name">CPF</Label>
                     <Input
                       type="text"
                       id="name"
                       placeholder="Nome Completo"
                       className="w-full"
-                      defaultValue={product?.brand}
+                      defaultValue={user?.document}
                       disabled
                     />
                   </div>
                 </div>
                 <div className="flex gap-4">
                   <div className="grid flex-1 items-center gap-1.5">
-                    <Label htmlFor="name">Quantidade</Label>
+                    <Label htmlFor="name">Cargo</Label>
                     <Input
                       type="text"
                       id="name"
                       disabled
                       className="w-full"
-                      defaultValue={product?.quantity}
+                      defaultValue={
+                        user?.role === "ADMIN" ? "Administrador" : "Default"
+                      }
                     />
                   </div>
                   <div className="grid flex-1 items-center gap-1.5">
-                    <Label htmlFor="name">Valor</Label>
+                    <Label htmlFor="name">Data do registro</Label>
                     <Input
                       type="text"
                       min={0}
                       id="name"
                       className="w-full"
                       disabled
-                      defaultValue={product?.price}
+                      defaultValue={new Date(
+                        user?.createdAt!
+                      ).toLocaleDateString()}
                     />
                   </div>
                 </div>
@@ -141,8 +107,8 @@ export function DetailsProduct() {
                       Tem certeza que deseja deletar o produto?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                      Ao confirmar essa ação, o produto{" "}
-                      <span className="text-rose-600">{product?.name}</span>{" "}
+                      Ao confirmar essa ação, o usuário{" "}
+                      <span className="text-rose-600">{user?.fullName}</span>{" "}
                       sera excluido permanentemente. Esta acão não pode ser
                       desfeita !
                     </AlertDialogDescription>
@@ -155,7 +121,7 @@ export function DetailsProduct() {
                   </AlertDialogContent>
                 </AlertDialog>
                 <Button variant={"secondary"} asChild>
-                  <Link to={`/products/${product?.id!}/edit`}>Editar</Link>
+                  <Link to={`/users/${user?.id!}/edit`}>Editar</Link>
                 </Button>
               </div>
             </CardFooter>

@@ -30,3 +30,7 @@ export async function signIn({
 }: SignInBody): Promise<{ data: SigninResponse }> {
   return await api.post("/login", { email, password });
 }
+
+export async function loggout(): Promise<void> {
+  return await api.delete("/logout");
+}
