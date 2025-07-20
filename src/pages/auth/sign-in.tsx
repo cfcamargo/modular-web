@@ -10,6 +10,7 @@ import { useMutation } from "@tanstack/react-query";
 import { signIn } from "@/api/sign-in";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { authApi } from "@/api";
 
 const signInForm = z.object({
   email: z.string().email(),
@@ -17,6 +18,8 @@ const signInForm = z.object({
 });
 
 type SignInForm = z.infer<typeof signInForm>;
+
+const { login } = authApi;
 
 export function SignIn() {
   const [searchParams] = useSearchParams();
@@ -33,14 +36,13 @@ export function SignIn() {
   const navigate = useNavigate();
 
   const { mutateAsync: authenticate } = useMutation({
-    mutationFn: signIn,
+    mutationFn: login,
   });
 
   const handleSignin = async (userData: SignInForm) => {
     try {
       const { data } = await authenticate(userData);
-      console.log(data);
-      localStorage.setItem("modular-token", data.token.token);
+      localStorage.setItem("modular-token", data.acessToken);
       toast.success(
         `Login Bem sucessido, Bem vindo ${data.user.fullName.split(" ")[0]}`
       );

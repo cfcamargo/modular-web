@@ -92,35 +92,38 @@ export default function CreateUser() {
                 </span>
               )}
             </div>
-            <div className="grid flex-1 items-center gap-1.5">
-              <Label htmlFor="name">Email</Label>
-              <Input
-                type="email"
-                id="email"
-                placeholder="Email"
-                className="w-full"
-                {...register("email")}
-              />
-              {errors.email && (
-                <span className="text-red-500 text-sm">
-                  {errors.email.message}
-                </span>
-              )}
-            </div>
-            <div className="grid flex-1 items-center gap-1.5">
-              <Label htmlFor="name">Cargo</Label>
-              <Select onValueChange={handleSelectChange} defaultValue="DEFAULT">
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o cargo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Selecione o cargo</SelectLabel>
-                    <SelectItem value="ADMIN">Administrador</SelectItem>
-                    <SelectItem value="DEFAULT">Default</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid flex-1 items-center gap-1.5">
+                <Label htmlFor="name">Email</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  placeholder="Email"
+                  className="w-full"
+                  {...register("email")}
+                />
+                {errors.email && (
+                  <span className="text-red-500 text-sm">
+                    {errors.email.message}
+                  </span>
+                )}
+              </div>
+              <div className="grid flex-1 items-center gap-1.5">
+                <Label htmlFor="name">Cargo</Label>
+                <Select onValueChange={handleSelectChange} defaultValue="2">
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione o cargo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Selecione o cargo</SelectLabel>
+                      <SelectItem value="1">Administrador</SelectItem>
+                      <SelectItem value="2">Usuário</SelectItem>
+                      <SelectItem value="3">Motorista</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="w-full flex gap-2 justify-end py-8">
