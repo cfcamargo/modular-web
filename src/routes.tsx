@@ -18,9 +18,21 @@ import CreateUser from "./pages/users/create-user";
 import { Register } from "./pages/auth/register";
 import { DetailsUser } from "./pages/users/details-user";
 
+const isTokenValid = (token: string | null): boolean => {
+  if (!token) return false;
+
+  try {
+    const [, payloadBase64] = token.split(".");
+    const payload = JSON.parse(atob(payloadBase64));
+    return payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+};
+
 const checkAuth = () => {
   const token = localStorage.getItem("modular-token");
-  return !!token;
+  return isTokenValid(token);
 };
 
 const protectedLoader = () => {

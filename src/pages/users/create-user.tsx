@@ -21,16 +21,16 @@ import { Label } from "@/components/ui/label";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { userApi } from "@/api";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z.string().min(4, { message: "Digite o nome do produto" }).optional(),
+  name: z.string().min(4, { message: "Digite o nome do usuário" }).optional(),
   email: z.string().email(),
-  role: z.enum(["ADMIN", "DEFAULT"]).default("DEFAULT"),
+  role: z.number().default(2),
 });
 
 export default function CreateUser() {

@@ -39,6 +39,7 @@ export function SignIn() {
   const handleSignin = async (userData: SignInForm) => {
     try {
       const { data } = await authenticate(userData);
+      console.log(data);
       localStorage.setItem("modular-token", data.token.token);
       toast.success(
         `Login Bem sucessido, Bem vindo ${data.user.fullName.split(" ")[0]}`
@@ -47,7 +48,12 @@ export function SignIn() {
       setTimeout(() => {
         navigate("/dashboard");
       }, 1000);
-    } catch {}
+    } catch (e) {
+      console.log(e);
+      toast.error(
+        `Erro ao realizar login, verifique suas credenciais e tente novamente`
+      );
+    }
   };
 
   return (
