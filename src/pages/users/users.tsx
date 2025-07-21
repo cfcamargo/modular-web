@@ -25,11 +25,23 @@ export default function UserList() {
 
   const getUsers = async (page = 1) => {
     setLoading(true);
+    const userRequest = {
+      page: 1,
+      perPage: 20,
+      searchTerm: "",
+    };
+
     await userApi
-      .get(page)
+      .get(userRequest)
       .then((response) => {
-        setUsers(response.data.users.data);
-        setMeta(response.data.users.meta);
+        let meta: MetaProps = {
+          lastPage: response.data.lastPage,
+          page: Number(response.data.page),
+          perPage: Number(response.data.perPage),
+          total: response.data.total,
+        };
+        setUsers(response.data.data);
+        setMeta(meta);
       })
       .catch(() => {
         toast.error("Erro ao buscar clientes");
@@ -100,7 +112,7 @@ export default function UserList() {
           </div>
           {meta && users.length > 0 && (
             <Pagination
-              pageIndex={meta.currentPage}
+              pageIndex={meta.page}
               totalCount={meta.total}
               perPage={meta.perPage}
               meta={meta}

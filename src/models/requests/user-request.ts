@@ -1,9 +1,13 @@
-import { RoleProps } from "../common/Role";
-
 export interface UserRequest {
   fullName?: string;
   email: string;
-  role: RoleProps;
+  role: number;
+}
+
+export interface UserGridRequst {
+  page: number;
+  perPage: number;
+  searchTerm: string;
 }
 
 export interface UpdateRequest {

@@ -1,11 +1,6 @@
 export interface MetaProps {
   total: number;
+  page: number;
   perPage: number;
-  currentPage: number;
   lastPage: number;
-  firstPage: number;
-  firstPageUrl: string;
-  lastPageUrl: string;
-  nextPageUrl: string | null;
-  previousPageUrl: string | null;
 }

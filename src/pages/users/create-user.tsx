@@ -28,7 +28,10 @@ import { userApi } from "@/api";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  name: z.string().min(4, { message: "Digite o nome do usuário" }).optional(),
+  fullName: z
+    .string()
+    .min(4, { message: "Digite o nome do usuário" })
+    .optional(),
   email: z.string().email(),
   role: z.number().default(2),
 });
@@ -42,7 +45,6 @@ export default function CreateUser() {
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     formState: { errors },
   } = useForm<BasicDataForm>({
@@ -50,17 +52,22 @@ export default function CreateUser() {
   });
 
   const onSubmitForm = (data: BasicDataForm) => {
-    setLoading(true);
-    userApi.save(data).then((response) => {
-      toast.success(
-        "Email enviado, o usuário pode completar seu registo através do link"
-      );
-      navigate("/users");
-    });
-    console.log(data);
+    try {
+      setLoading(true);
+      userApi.save(data).then((response) => {
+        toast.success(
+          "Email enviado, o usuário pode completar seu registo através do link"
+        );
+        navigate("/users");
+      });
+    } catch {
+      toast.error("Erro ao criar usuário");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSelectChange = (value: "ADMIN" | "DEFAULT") => {
+  const handleSelectChange = (value: number) => {
     setValue("role", value);
   };
 
@@ -84,11 +91,11 @@ export default function CreateUser() {
                 id="name"
                 placeholder="Nome Completo"
                 className="w-full"
-                {...register("name")}
+                {...register("fullName")}
               />
-              {errors.name && (
+              {errors.fullName && (
                 <span className="text-red-500 text-sm">
-                  {errors.name.message}
+                  {errors.fullName.message}
                 </span>
               )}
             </div>
@@ -110,7 +117,10 @@ export default function CreateUser() {
               </div>
               <div className="grid flex-1 items-center gap-1.5">
                 <Label htmlFor="name">Cargo</Label>
-                <Select onValueChange={handleSelectChange} defaultValue="2">
+                <Select
+                  onValueChange={(val) => handleSelectChange(Number(val))}
+                  defaultValue="2"
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione o cargo" />
                   </SelectTrigger>

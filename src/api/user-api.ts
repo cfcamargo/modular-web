@@ -1,19 +1,21 @@
-import { MetaProps } from "@/models/responses/meta-response";
 import { UserResponse } from "@/models/responses/user-response";
-import { IUserApi } from "./interface/users-api";
 import { api } from "@/lib/axios";
 import {
   UpdatePasswordRequest,
+  UserGridRequst,
   UserRequest,
   UserUpdateByCodeRequest,
 } from "@/models/requests/user-request";
+import { PaginatedResponse } from "@/models/requests/paginated-response";
 
 const baseURL = "/users";
-export class UserApi extends IUserApi {
-  get(page: number): Promise<{
-    data: { users: { meta: MetaProps; data: UserResponse[] } };
-  }> {
-    return api.get(`${baseURL}?page=${page}`);
+export class UserApi {
+  get(
+    request: UserGridRequst
+  ): Promise<{ data: PaginatedResponse<UserResponse> }> {
+    return api.get(`${baseURL}`, {
+      params: request,
+    });
   }
 
   save(request: UserRequest): Promise<{ data: { user: UserResponse } }> {

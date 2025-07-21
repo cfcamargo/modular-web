@@ -38,8 +38,8 @@ export default function Pagination({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            onClick={() => getData(meta.firstPage)}
-            disabled={meta.currentPage === meta.firstPage}
+            onClick={() => getData(1)}
+            disabled={meta.page === 1}
           >
             <ChevronsLeft className="h-4 w-4" />
             <span className="sr-only">Primeira página</span>
@@ -47,8 +47,8 @@ export default function Pagination({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={meta.currentPage === 1}
-            onClick={() => getData(meta.currentPage - 1)}
+            disabled={meta.page === 1}
+            onClick={() => getData(meta.page - 1)}
           >
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Página Anterior</span>
@@ -56,8 +56,8 @@ export default function Pagination({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={meta.currentPage === meta.lastPage}
-            onClick={() => getData(meta.currentPage + 1)}
+            disabled={meta.page === meta.lastPage}
+            onClick={() => getData(meta.page + 1)}
           >
             <ChevronRight className="h-4 w-4" />
             <span className="sr-only">Póxima página</span>
@@ -65,7 +65,7 @@ export default function Pagination({
           <Button
             variant="outline"
             className="h-8 w-8 p-0"
-            disabled={meta.currentPage === meta.lastPage}
+            disabled={meta.page === meta.lastPage}
             onClick={() => getData(meta.lastPage)}
           >
             <ChevronsRight className="h-4 w-4" />
