@@ -1,3 +1,4 @@
+import { userApi } from "@/api";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,15 +21,38 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserResponse } from "@/models/responses/user-response";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 export function DetailsUser() {
   const [loading, setLoading] = useState(false);
+  const { id } = useParams();
   const [user, setUser] = useState<UserResponse | null>();
 
-  const destroyProduct = () => {};
+  const navigate = useNavigate();
+
+  const destroyUser = () => {};
+
+  const getUserById = async () => {
+    setLoading(true);
+    await userApi
+      .getDetails(id!)
+      .then((response) => {
+        setUser(response.data.user);
+      })
+      .catch((e) => {
+        console.log(e);
+        navigate("/404");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    getUserById();
+  }, []);
 
   return (
     <>
@@ -104,7 +128,7 @@ export function DetailsUser() {
                   </Button>
                   <AlertDialogContent>
                     <AlertDialogTitle>
-                      Tem certeza que deseja deletar o produto?
+                      Tem certeza que deseja deletar o usuário?
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       Ao confirmar essa ação, o usuário{" "}
@@ -114,7 +138,7 @@ export function DetailsUser() {
                     </AlertDialogDescription>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={destroyProduct}>
+                      <AlertDialogAction onClick={destroyUser}>
                         Confirmar
                       </AlertDialogAction>
                     </AlertDialogFooter>

@@ -7,7 +7,6 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
-import { signIn } from "@/api/sign-in";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { authApi } from "@/api";
@@ -29,7 +28,9 @@ export function SignIn() {
     formState: { isSubmitting },
   } = useForm<SignInForm>({
     defaultValues: {
-      email: searchParams.get("email") ?? "",
+      // email: searchParams.get("email") ?? "",
+      email: "admin@admin.com",
+      password: "password",
     },
   });
 
@@ -42,7 +43,6 @@ export function SignIn() {
   const handleSignin = async (userData: SignInForm) => {
     try {
       const { data } = await authenticate(userData);
-      localStorage.setItem("modular-token", data.acessToken);
       toast.success(
         `Login Bem sucessido, Bem vindo ${data.user.fullName.split(" ")[0]}`
       );

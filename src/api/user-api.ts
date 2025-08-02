@@ -22,7 +22,7 @@ export class UserApi {
     return api.post(baseURL, request);
   }
 
-  getDetails(id: number): Promise<{ data: { user: UserResponse } }> {
+  getDetails(id: string): Promise<{ data: { user: UserResponse } }> {
     return api.get(`${baseURL}/${id}`);
   }
 

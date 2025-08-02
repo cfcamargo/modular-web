@@ -17,36 +17,29 @@ import UserList from "./pages/users/users";
 import CreateUser from "./pages/users/create-user";
 import { Register } from "./pages/auth/register";
 import { DetailsUser } from "./pages/users/details-user";
+import { authApi } from "./api";
+import { useUserLoggedStore } from "@/store/auth/user-logged.ts";
+import { toast } from "sonner";
 
-const isTokenValid = (token: string | null): boolean => {
-  if (!token) return false;
-
+const checkAuth = async () => {
+  useUserLoggedStore.getState().setLoadingUserLoggedData(true);
   try {
-    const [, payloadBase64] = token.split(".");
-    const payload = JSON.parse(atob(payloadBase64));
-    return payload.exp * 1000 > Date.now();
+    const { data } = await authApi.me();
+    useUserLoggedStore.getState().setUser(data.user); // usuário autenticado — passa
   } catch {
-    return false;
-  }
-};
-
-const checkAuth = () => {
-  const token = localStorage.getItem("modular-token");
-  return isTokenValid(token);
-};
-
-const protectedLoader = () => {
-  if (!checkAuth()) {
+    toast.error("Sessão expirada, Faça Login novamente");
     return redirect("/sign-in");
+  } finally {
+    useUserLoggedStore.getState().setLoadingUserLoggedData(false);
   }
-  return null;
 };
 
-const publicLoader = () => {
-  if (checkAuth()) {
-    return redirect("/dashboard");
-  }
-  return null;
+const protectedLoader = async () => {
+  return await checkAuth();
+};
+
+const publicLoader = async () => {
+  return true;
 };
 
 export const router = createBrowserRouter([

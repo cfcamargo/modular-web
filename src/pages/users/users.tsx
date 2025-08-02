@@ -87,8 +87,8 @@ export default function UserList() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[140px]">ID</TableHead>
                     <TableHead>Nome</TableHead>
+                    <TableHead>CPF</TableHead>
                     <TableHead className="w-[140px]">Cargo</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Cadastrado em</TableHead>

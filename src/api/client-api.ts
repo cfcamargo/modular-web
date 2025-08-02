@@ -1,5 +1,4 @@
 import { api } from "@/lib/axios";
-import { IClientApi } from "./interface/client-api";
 import {
   ClientDetailsResponse,
   ClientResponse,
@@ -8,7 +7,7 @@ import { ClientRequest } from "@/models/requests/client-request";
 import { MetaProps } from "@/models/responses/meta-response";
 
 const baseURL = "/clients";
-export class ClientApi extends IClientApi {
+export class ClientApi {
   get(page: number): Promise<{
     data: { clients: { meta: MetaProps; data: ClientResponse[] } };
   }> {

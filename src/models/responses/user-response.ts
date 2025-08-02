@@ -2,7 +2,7 @@ export interface UserResponse {
   id: number;
   fullName: string;
   email: string;
-  role: string;
+  role: number;
   createdAt: string;
   updatedAt: string;
   document: string;

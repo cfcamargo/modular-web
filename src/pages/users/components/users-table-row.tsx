@@ -23,11 +23,26 @@ export default function UserTableRow({
   user,
   destroyUser,
 }: ClientTableRowProps) {
+  const getUserRole = (id: number) => {
+    switch (id) {
+      case 1:
+        return "Administrador";
+      case 2:
+        return "Padrão";
+      case 3:
+        return "Motorista";
+      default:
+        return "Unknown";
+    }
+  };
+
   return (
     <TableRow>
-      <TableCell className="font-mono text-xs font-medium">{user.id}</TableCell>
       <TableCell className="text-muted-foreground">{user.fullName}</TableCell>
-      <TableCell>{user.role}</TableCell>
+      <TableCell className="text-muted-foreground">
+        {user.document ? user.document : "-"}
+      </TableCell>
+      <TableCell>{getUserRole(user.role)}</TableCell>
       <TableCell className="font-medium">{user.email}</TableCell>
       <TableCell className="font-medium">
         {new Date(user.createdAt).toLocaleDateString()}

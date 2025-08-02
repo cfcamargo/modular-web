@@ -20,24 +20,24 @@ const menuItems: MenuItem[] = [
     path: "/dashboard",
     name: "Dashboard",
   },
-  {
-    path: "/clients",
-    name: "Clientes",
-  },
-  {
-    path: "",
-    name: "Vendas",
-    subItems: [
-      {
-        name: "Orçamentos",
-        path: "/budgets",
-      },
-      {
-        name: "Pedidos",
-        path: "/orders",
-      },
-    ],
-  },
+  // {
+  //   path: "/clients",
+  //   name: "Clientes",
+  // },
+  // {
+  //   path: "",
+  //   name: "Vendas",
+  //   subItems: [
+  //     {
+  //       name: "Orçamentos",
+  //       path: "/budgets",
+  //     },
+  //     {
+  //       name: "Pedidos",
+  //       path: "/orders",
+  //     },
+  //   ],
+  // },
   {
     name: "Estoque",
     path: "",
@@ -46,10 +46,10 @@ const menuItems: MenuItem[] = [
         path: "/products",
         name: "Produtos",
       },
-      {
-        path: "/production",
-        name: "Produção",
-      },
+      // {
+      //   path: "/production",
+      //   name: "Produção",
+      // },
     ],
   },
   {

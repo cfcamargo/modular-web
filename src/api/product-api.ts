@@ -1,11 +1,10 @@
 import { MetaProps } from "@/models/responses/meta-response";
 import { ProductResponse } from "@/models/responses/product-response";
-import { IProductApi } from "./interface/product-api";
 import { api } from "@/lib/axios";
 import { ProductRequest } from "@/models/requests/product-request";
 
 const baseURL = "/products";
-export class ProductApi extends IProductApi {
+export class ProductApi {
   get(page: number): Promise<{
     data: { products: { meta: MetaProps; data: ProductResponse[] } };
   }> {
