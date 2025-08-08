@@ -17,19 +17,33 @@ import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import ProductTableRow from "./components/product-table-row";
+import { GridRequest } from "@/models/requests/grid-request";
+import { PaginationEnum } from "@/utils/enums/PaginationEnum";
 
 export function Products() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [meta, setMeta] = useState<MetaProps | null>();
 
-  const getProducts = async (page: number = 1) => {
+  const getProducts = async (page: number = 1, filter?: string) => {
+    const productPaylod: GridRequest = {
+      page,
+      perPage: PaginationEnum.PER_PAGE20,
+      searchTerm: filter ?? "",
+    };
+
     setLoading(true);
     productApi
-      .get(page)
+      .get(productPaylod)
       .then((response) => {
-        setProducts(response.data.products.data);
-        setMeta(response.data.products.meta);
+        let meta: MetaProps = {
+          lastPage: response.data.lastPage,
+          page: Number(response.data.page),
+          perPage: Number(response.data.perPage),
+          total: response.data.total,
+        };
+        setProducts(response.data.data);
+        setMeta(meta);
       })
       .catch((e) => {
         toast.error("Erro ao buscar produtos");
@@ -100,7 +114,7 @@ export function Products() {
           </div>
           {meta && products.length > 0 && (
             <Pagination
-              pageIndex={meta.currentPage}
+              pageIndex={meta.page}
               totalCount={meta.total}
               perPage={meta.perPage}
               meta={meta}

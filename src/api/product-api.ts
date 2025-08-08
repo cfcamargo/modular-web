@@ -1,14 +1,17 @@
-import { MetaProps } from "@/models/responses/meta-response";
 import { ProductResponse } from "@/models/responses/product-response";
 import { api } from "@/lib/axios";
 import { ProductRequest } from "@/models/requests/product-request";
+import { PaginatedResponse } from "@/models/requests/paginated-response";
+import { GridRequest } from "@/models/requests/grid-request";
 
 const baseURL = "/products";
 export class ProductApi {
-  get(page: number): Promise<{
-    data: { products: { meta: MetaProps; data: ProductResponse[] } };
-  }> {
-    return api.get(`${baseURL}?page=${page}`);
+  get(
+    request: GridRequest
+  ): Promise<{ data: PaginatedResponse<ProductResponse> }> {
+    return api.get(`${baseURL}`, {
+      params: request,
+    });
   }
 
   save(

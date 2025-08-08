@@ -17,18 +17,20 @@ import { userApi } from "@/api";
 import { toast } from "sonner";
 import Pagination from "@/components/shared/pagination";
 import { MetaProps } from "@/models/responses/meta-response";
+import { GridRequest } from "@/models/requests/grid-request";
+import { PaginationEnum } from "@/utils/enums/PaginationEnum";
 
 export default function UserList() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [meta, setMeta] = useState<MetaProps | null>();
 
-  const getUsers = async (page = 1) => {
+  const getUsers = async (page = 1, filter?: string) => {
     setLoading(true);
-    const userRequest = {
-      page: 1,
-      perPage: 20,
-      searchTerm: "",
+    const userRequest: GridRequest = {
+      page,
+      perPage: PaginationEnum.PER_PAGE20,
+      searchTerm: filter ?? "",
     };
 
     await userApi
@@ -77,7 +79,9 @@ export default function UserList() {
             disabled={users.length === 0}
             description="Nome do usuário"
             onClearFilter={() => {}}
-            onSubmitFilter={() => {}}
+            onSubmitFilter={(filter: string) => {
+              getUsers(1, filter);
+            }}
           />
 
           <div className="rounded-md border">
