@@ -100,7 +100,7 @@ export function DetailsUser() {
                       disabled
                       className="w-full"
                       defaultValue={
-                        user?.role === "ADMIN" ? "Administrador" : "Default"
+                        user?.role === 1 ? "Administrador" : "Default"
                       }
                     />
                   </div>

@@ -31,7 +31,7 @@ export default function Clients() {
         setClients(response.data.clients.data);
         setMeta(response.data.clients.meta);
       })
-      .catch((e) => {
+      .catch(() => {
         toast.error("Erro ao buscar clientes");
       })
       .finally(() => {
@@ -46,7 +46,7 @@ export default function Clients() {
         getClients();
         toast.success(`O cliente ${client.fullName} foi deletado com sucesso`);
       })
-      .catch((e) => {
+      .catch(() => {
         toast.error("Erro ao deletar cliente");
       });
   };
@@ -101,7 +101,7 @@ export default function Clients() {
           </div>
           {meta && clients.length > 0 && (
             <Pagination
-              pageIndex={meta.currentPage}
+              pageIndex={meta.page}
               totalCount={meta.total}
               perPage={meta.perPage}
               meta={meta}

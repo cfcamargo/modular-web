@@ -29,7 +29,7 @@ export function ResetPassword() {
     },
   });
 
-  const { mutateAsync: authenticate } = useMutation({
+  useMutation({
     mutationFn: signIn,
   });
 

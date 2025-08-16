@@ -24,13 +24,23 @@ export function Products() {
 
   const getProducts = async (page: number = 1) => {
     setLoading(true);
+    const request = {
+      page,
+      perPage: 10,
+      searchTerm: ""
+    };
     productApi
-      .get(page)
+      .get(request)
       .then((response) => {
-        setProducts(response.data.products.data);
-        setMeta(response.data.products.meta);
+        setProducts(response.data.data);
+        setMeta({
+          page: response.data.page,
+          perPage: response.data.perPage,
+          total: response.data.total,
+          lastPage: response.data.lastPage
+        });
       })
-      .catch((e) => {
+      .catch(() => {
         toast.error("Erro ao buscar produtos");
       })
       .finally(() => {
@@ -96,7 +106,7 @@ export function Products() {
           </div>
           {meta && products.length > 0 && (
             <Pagination
-              pageIndex={meta.currentPage}
+              pageIndex={meta.page}
               totalCount={meta.total}
               perPage={meta.perPage}
               meta={meta}

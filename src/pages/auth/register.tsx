@@ -28,8 +28,8 @@ export function Register() {
   const { code } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [loadingSave, setLoadingSave] = useState(false);
+  const [, setLoading] = useState(false);
+
 
   const {
     register,
@@ -39,18 +39,18 @@ export function Register() {
   } = useForm<SignInForm>();
 
   const handleSignin = async (data: SignInForm) => {
-    setLoadingSave(true);
+    setLoading(true);
     resetPasswordApi
       .updateUserByCode(data, String(code))
       .then(() => {
         toast.success("Dados salvos com sucesso, você ja pode fazer login");
         navigate("/sign-in");
       })
-      .catch((e) => {
+      .catch(() => {
         toast.error("Erro ao salvar os dados, tente novamente");
       })
       .finally(() => {
-        setLoadingSave(false);
+        setLoading(false);
       });
   };
 

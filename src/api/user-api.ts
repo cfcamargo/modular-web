@@ -45,8 +45,7 @@ export class UserApi {
   }
 
   updatePassword(
-    request: UpdatePasswordRequest,
-    id: number
+    request: UpdatePasswordRequest
   ): Promise<{ data: { user: UserResponse } }> {
     return api.patch(`${baseURL}/update-password`, request);
   }

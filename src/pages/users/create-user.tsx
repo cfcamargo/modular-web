@@ -54,7 +54,7 @@ export default function CreateUser() {
   const onSubmitForm = (data: BasicDataForm) => {
     try {
       setLoading(true);
-      userApi.save(data).then((response) => {
+      userApi.save(data).then(() => {
         toast.success(
           "Email enviado, o usuário pode completar seu registo através do link"
         );

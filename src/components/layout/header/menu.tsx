@@ -1,12 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { MenuItem } from "./types";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
+
 import {
   NavigationMenu,
   NavigationMenuList,

@@ -45,7 +45,7 @@ export function Products() {
         setProducts(response.data.data);
         setMeta(meta);
       })
-      .catch((e) => {
+      .catch(() => {
         toast.error("Erro ao buscar produtos");
       })
       .finally(() => {

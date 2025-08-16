@@ -1,19 +1,94 @@
-import { Controller, Control } from "react-hook-form";
 import CurrencyInput, { CurrencyInputProps } from "react-currency-input-field";
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
+import { forwardRef } from "react";
 
-interface CurrencyInputFieldProps extends CurrencyInputProps {}
+interface CurrencyInputFieldProps extends Omit<CurrencyInputProps, 'value' | 'onValueChange' | 'onChange'> {
+  value?: number | string;
+  onChange?: (value: number | undefined) => void;
+}
 
-export function ControlledCurrencyInput({
-  className,
-  ...props
-}: CurrencyInputFieldProps) {
+export const ControlledCurrencyInput = forwardRef<HTMLInputElement, CurrencyInputFieldProps>((
+  { className, value, onChange, ...props },
+  ref
+) => {
+  // Converte valor numérico para string formatada para exibição
+  const formatValueForDisplay = (val: number | string | undefined): string | undefined => {
+    if (val === undefined || val === null || val === '') return undefined;
+    
+    // Se já é uma string, verifica se é válida
+    if (typeof val === 'string') {
+      // Se a string está vazia ou é apenas espaços, retorna undefined
+      if (val.trim() === '') return undefined;
+      // Se contém apenas números, vírgulas e pontos, retorna como está
+      if (/^[0-9.,\s]*$/.test(val)) return val;
+      // Caso contrário, tenta converter para número e reformatar
+      const numericValue = parseFloat(val.replace(/\./g, '').replace(',', '.'));
+      if (!isNaN(numericValue)) {
+        return numericValue.toLocaleString('pt-BR', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+      }
+      return undefined;
+    }
+    
+    // Se é um número, converte para string formatada brasileira
+    if (typeof val === 'number') {
+      // Verifica se é um número válido
+      if (isNaN(val) || !isFinite(val)) return undefined;
+      // Garante que não seja negativo (já que allowNegativeValue é false)
+      const positiveVal = Math.max(0, val);
+      return positiveVal.toLocaleString('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+    
+    return undefined;
+  };
+
+  // Converte string formatada para número
+  const handleValueChange = (value: string | undefined) => {
+    if (!onChange) return;
+    
+    if (!value || value.trim() === '') {
+      onChange(undefined);
+      return;
+    }
+
+    try {
+      // Remove formatação e converte para número
+      const cleanValue = value.replace(/\./g, '').replace(',', '.');
+      const numericValue = parseFloat(cleanValue);
+      
+      // Verifica se é um número válido e finito
+      if (isNaN(numericValue) || !isFinite(numericValue)) {
+        onChange(undefined);
+        return;
+      }
+      
+      // Garante que não seja negativo
+      const positiveValue = Math.max(0, numericValue);
+      
+      // Limita a 2 casas decimais
+      const roundedValue = Math.round(positiveValue * 100) / 100;
+      
+      onChange(roundedValue);
+    } catch (error) {
+      // Em caso de erro na conversão, define como undefined
+      console.warn('Erro ao converter valor monetário:', error);
+      onChange(undefined);
+    }
+  };
+
   return (
     <CurrencyInput
+      ref={ref}
       intlConfig={{ locale: "pt-BR", currency: "BRL" }}
       allowNegativeValue={false}
       accept="0-9,."
+      value={formatValueForDisplay(value)}
+      onValueChange={handleValueChange}
       onKeyDown={(e) => {
         const allowedKeys = [
           "Backspace",
@@ -43,4 +118,6 @@ export function ControlledCurrencyInput({
       {...props}
     />
   );
-}
+});
+
+ControlledCurrencyInput.displayName = "ControlledCurrencyInput";

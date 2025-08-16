@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Helmet } from "react-helmet-async";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ type SignInForm = z.infer<typeof signInForm>;
 const { login } = authApi;
 
 export function SignIn() {
-  const [searchParams] = useSearchParams();
+
   const {
     register,
     handleSubmit,

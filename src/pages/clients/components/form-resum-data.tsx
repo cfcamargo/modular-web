@@ -42,10 +42,10 @@ export function FormResumData({ backProgress }: FormResumProps) {
           toast.success(
             `Cliente ${response.data.client.fullName} cadastrado com sucesso.`
           );
-          reset();
+          setLoading(false);
           navigate(`/clients/${response.data.client.id}`);
         })
-        .catch((e) => {
+        .catch(() => {
           toast.error("Erro ao criar cliente");
         })
         .finally(() => {
@@ -56,14 +56,14 @@ export function FormResumData({ backProgress }: FormResumProps) {
     if (mode === "edit") {
       await clientApi
         .update(payload, Number(id))
-        .then((response) => {
+        .then(() => {
           toast.success(
             `Cliente ${basicData.fullName} atualizado com sucesso.`
           );
           reset();
           navigate(`/clients/${id}`);
         })
-        .catch((e) => {
+        .catch(() => {
           toast.error("Erro ao atualizar o cliente");
         })
         .finally(() => {

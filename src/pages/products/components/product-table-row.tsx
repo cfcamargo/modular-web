@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ProductResponse } from "@/models/responses/product-response";
-import { Pen, Search, Trash2 } from "lucide-react";
+import { Search, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface ClientTableRowProps {
@@ -37,12 +37,6 @@ export default function ProductTableRow({
           <Link to={`/products/${product.id}`}>
             <Search className="h-3 w-3" />
             <span className="sr-only">Detalhes do Produto</span>
-          </Link>
-        </Button>
-        <Button variant="outline" asChild size="xs">
-          <Link to={`/products/${product.id}/edit`}>
-            <Pen className="h-3 w-3" />
-            <span className="sr-only">Editar produto</span>
           </Link>
         </Button>
         <AlertDialog>

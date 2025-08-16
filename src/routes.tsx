@@ -10,9 +10,7 @@ import DetailsClient from "./pages/clients/details-client";
 import { NotFoud } from "./pages/_layouts/404";
 import EditClient from "./pages/clients/edit-client";
 import { Products } from "./pages/products/products";
-import { NewProduct } from "./pages/products/new-product";
-import { DetailsProduct } from "./pages/products/details-product";
-import { EditProduct } from "./pages/products/edit-product";
+import NewProduct from "./pages/products/new-product";
 import UserList from "./pages/users/users";
 import CreateUser from "./pages/users/create-user";
 import { Register } from "./pages/auth/register";
@@ -20,6 +18,7 @@ import { DetailsUser } from "./pages/users/details-user";
 import { authApi } from "./api";
 import { useUserLoggedStore } from "@/store/auth/user-logged.ts";
 import { toast } from "sonner";
+import DetailsProduct from "./pages/products/details-product";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -58,7 +57,6 @@ export const router = createBrowserRouter([
       { path: "/products", element: <Products /> },
       { path: "/products/create", element: <NewProduct /> },
       { path: "/products/:id", element: <DetailsProduct /> },
-      { path: "/products/:id/edit", element: <EditProduct /> },
       { path: "/users", element: <UserList /> },
       { path: "/users/create", element: <CreateUser /> },
       { path: "/users/:id/edit", element: <CreateUser /> },

@@ -16,11 +16,11 @@ export class ProductApi {
 
   save(
     request: ProductRequest
-  ): Promise<{ data: { product: ProductResponse } }> {
+  ): Promise<{ data: ProductResponse }> {
     return api.post(baseURL, request);
   }
 
-  getDetails(id: number): Promise<{ data: { product: ProductResponse } }> {
+  getDetails(id: string): Promise<{ data: { product: ProductResponse } }> {
     return api.get(`${baseURL}/${id}`);
   }
 

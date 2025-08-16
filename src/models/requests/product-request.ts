@@ -1,6 +1,8 @@
 export interface ProductRequest {
   name: string;
   brand: string;
-  quantity: number;
+  costPrice: number;
+  description?: string
   price: number;
+  unit: "KG" | "UN" | "M2";
 }
