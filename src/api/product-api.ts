@@ -34,4 +34,8 @@ export class ProductApi {
   ): Promise<{ data: { product: ProductResponse } }> {
     return api.patch(`${baseURL}/${id}`, request);
   }
+
+  deactivate(id: number): Promise<{ data: { product: ProductResponse } }> {
+    return api.patch(`${baseURL}/${id}/deactivate`);
+  }
 }

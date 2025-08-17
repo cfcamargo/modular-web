@@ -3,25 +3,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ControlledCurrencyInput } from "@/components/ui/currency-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ProductRequest } from "@/models/requests/product-request";
 import { ProductApi } from "@/api/product-api";
+import { ProductResponse } from "@/models/responses/product-response";
 
 const productApi = new ProductApi();
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Package, ArrowLeft } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Package, ArrowLeft, AlertTriangle } from "lucide-react";
+import { useEffect, useState, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
+import { PercentInputField } from "@/components/shared/percent-input-field";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   brand: z.string().min(1, "Marca é obrigatória"),
-  price: z.number().min(0.01, "Preço deve ser maior que zero"),
-  costPrice: z.number().min(0.01, "Preço de custo deve ser maior que zero"),
+  marginPercent: z.string().min(1, "Margem percentual é obrigatória"),
   description: z.string().min(1, "Descrição é obrigatória"),
   unit: z.enum(["KG", "UN", "M2"], {
     required_error: "Unidade de medida é obrigatória",
@@ -35,6 +52,10 @@ export default function ProductForm() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isDeactivating, setIsDeactivating] = useState(false);
+  const [originalData, setOriginalData] = useState<ProductResponse | null>(
+    null
+  );
   const isEditing = Boolean(id);
 
   const {
@@ -42,18 +63,32 @@ export default function ProductForm() {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       brand: "",
-      price: 0,
-      costPrice: 0,
-      description: "",
+      marginPercent: "",
       unit: "UN",
     },
   });
+
+  // Observa todos os campos do formulário
+  const watchedFields = watch();
+
+  // Verifica se houve mudanças nos campos
+  const hasChanges = useMemo(() => {
+    if (!isEditing || !originalData) return false;
+
+    return (
+      watchedFields.name !== originalData.name ||
+      watchedFields.brand !== originalData.brand ||
+      watchedFields.marginPercent !== String(originalData.marginPercent) ||
+      watchedFields.description !== originalData.description
+    );
+  }, [watchedFields, originalData, isEditing]);
 
   useEffect(() => {
     if (isEditing && id) {
@@ -63,16 +98,19 @@ export default function ProductForm() {
 
   const loadProductData = async () => {
     if (!id) return;
-    
+
     setIsLoadingData(true);
     try {
       const product = await productApi.getDetails(id);
-      setValue("name", product.data.product.name);
-      setValue("brand", product.data.product.brand);
-      setValue("price", product.data.product.price);
-      setValue("costPrice", 0); // costPrice não existe no ProductResponse
-      setValue("description", ""); // description não existe no ProductResponse
-      setValue("unit", "UN"); // unit não existe no ProductResponse
+      const productData = product.data.product;
+
+      // Armazena os dados originais para comparação
+      setOriginalData(productData);
+
+      setValue("name", productData.name);
+      setValue("brand", productData.brand);
+      setValue("marginPercent", String(productData.marginPercent));
+      setValue("description", productData.description);
     } catch (error) {
       toast.error("Erro ao carregar dados do produto");
       navigate("/products");
@@ -87,8 +125,7 @@ export default function ProductForm() {
       const productData: ProductRequest = {
         name: data.name,
         brand: data.brand,
-        price: data.price,
-        costPrice: data.costPrice,
+        marginPercent: Number(data.marginPercent),
         description: data.description,
         unit: data.unit,
       };
@@ -100,11 +137,11 @@ export default function ProductForm() {
         await productApi.save(productData);
         toast.success("Produto criado com sucesso!");
       }
-      
+
       navigate("/products");
     } catch (error) {
       toast.error(
-        isEditing 
+        isEditing
           ? "Erro ao atualizar produto. Tente novamente."
           : "Erro ao criar produto. Tente novamente."
       );
@@ -113,12 +150,29 @@ export default function ProductForm() {
     }
   };
 
+  const handleDeactivateProduct = async () => {
+    if (!id) return;
+
+    setIsDeactivating(true);
+    try {
+      await productApi.deactivate(Number(id));
+      toast.success("Produto desativado com sucesso!");
+      navigate("/products");
+    } catch (error) {
+      toast.error("Erro ao desativar produto. Tente novamente.");
+    } finally {
+      setIsDeactivating(false);
+    }
+  };
+
   if (isLoadingData) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
           <Package className="h-8 w-8 animate-spin mx-auto mb-2" />
-          <p className="text-muted-foreground">Carregando dados do produto...</p>
+          <p className="text-muted-foreground">
+            Carregando dados do produto...
+          </p>
         </div>
       </div>
     );
@@ -137,19 +191,33 @@ export default function ProductForm() {
             {isEditing ? "Editar Produto" : "Novo Produto"}
           </h1>
           <p className="text-muted-foreground">
-            {isEditing 
+            {isEditing
               ? "Atualize as informações do produto"
-              : "Preencha as informações para criar um novo produto"
-            }
+              : "Preencha as informações para criar um novo produto"}
           </p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            Informações do Produto
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Informações do Produto
+            </div>
+            {isEditing && originalData && (
+              <div className="flex items-center gap-2">
+                <span
+                  className={`text-sm px-2 py-1 rounded-full ${
+                    originalData.status === 1
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {originalData.status === 1 ? "Ativo" : "Inativo"}
+                </span>
+              </div>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -163,7 +231,9 @@ export default function ProductForm() {
                   {...register("name")}
                 />
                 {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.name.message}
+                  </p>
                 )}
               </div>
 
@@ -175,44 +245,19 @@ export default function ProductForm() {
                   {...register("brand")}
                 />
                 {errors.brand && (
-                  <p className="text-sm text-destructive">{errors.brand.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.brand.message}
+                  </p>
                 )}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="price">Preço de Venda</Label>
-                <Controller
-                  control={control}
-                  name="price"
-                  render={({ field }) => (
-                    <ControlledCurrencyInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="0,00"
-                    />
-                  )}
+                <PercentInputField
+                  label="Margem Percentual"
+                  placeholder="Digite a margem de lucro para o produto"
+                  error={errors.marginPercent?.message}
+                  {...register("marginPercent")}
                 />
-                {errors.price && (
-                  <p className="text-sm text-destructive">{errors.price.message}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="costPrice">Preço de Custo</Label>
-                <Controller
-                  control={control}
-                  name="costPrice"
-                  render={({ field }) => (
-                    <ControlledCurrencyInput
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="0,00"
-                    />
-                  )}
-                />
-                {errors.costPrice && (
-                  <p className="text-sm text-destructive">{errors.costPrice.message}</p>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -238,7 +283,9 @@ export default function ProductForm() {
                   )}
                 />
                 {errors.unit && (
-                  <p className="text-sm text-destructive">{errors.unit.message}</p>
+                  <p className="text-sm text-destructive">
+                    {errors.unit.message}
+                  </p>
                 )}
                 {isEditing && (
                   <p className="text-xs text-muted-foreground">
@@ -257,17 +304,61 @@ export default function ProductForm() {
                 {...register("description")}
               />
               {errors.description && (
-                <p className="text-sm text-destructive">{errors.description.message}</p>
+                <p className="text-sm text-destructive">
+                  {errors.description.message}
+                </p>
               )}
             </div>
 
-            <div className="flex gap-4 pt-6">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? "Salvando..." : isEditing ? "Atualizar Produto" : "Criar Produto"}
-              </Button>
-              <Button type="button" variant="outline" asChild>
-                <Link to="/products">Cancelar</Link>
-              </Button>
+            <div className="flex gap-4 pt-6 justify-between">
+              <div>
+                {isEditing && originalData?.status === 1 && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        disabled={isDeactivating}
+                      >
+                        <AlertTriangle className="h-4 w-4 mr-2" />
+                        {isDeactivating ? "Apagando..." : "Apagar Produto"}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Apagar Produto</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja apagar este produto?
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDeactivateProduct}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Apagar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
+              <div className="flex gap-4">
+                <Button type="button" variant="outline" asChild>
+                  <Link to="/products">Cancelar</Link>
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading || (isEditing && !hasChanges)}
+                >
+                  {isLoading
+                    ? "Salvando..."
+                    : isEditing
+                    ? "Atualizar Produto"
+                    : "Criar Produto"}
+                </Button>
+              </div>
             </div>
           </form>
         </CardContent>

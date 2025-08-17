@@ -19,6 +19,8 @@ import { authApi } from "./api";
 import { useUserLoggedStore } from "@/store/auth/user-logged.ts";
 import { toast } from "sonner";
 import DetailsProduct from "./pages/products/details-product";
+import { Movements } from "./pages/movements/movements";
+import { NewMovement } from "./pages/movements/new-movement";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -57,6 +59,8 @@ export const router = createBrowserRouter([
       { path: "/products", element: <Products /> },
       { path: "/products/create", element: <NewProduct /> },
       { path: "/products/:id", element: <DetailsProduct /> },
+      { path: "/movements", element: <Movements /> },
+      { path: "/movements/new", element: <NewMovement /> },
       { path: "/users", element: <UserList /> },
       { path: "/users/create", element: <CreateUser /> },
       { path: "/users/:id/edit", element: <CreateUser /> },

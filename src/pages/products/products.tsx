@@ -69,9 +69,11 @@ export function Products() {
           <h1 className="text-3xl font-bold tracking-tighter">
             Produtos Cadastrados
           </h1>
-          <Button className="h-8" asChild disabled={loading}>
-            <Link to="/products/create">Novo Produto</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button className="h-8" asChild disabled={loading}>
+              <Link to="/products/create">Novo Produto</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2.5">
@@ -89,13 +91,13 @@ export function Products() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[140px]">ID</TableHead>
-                    <TableHead>Nome do Produto</TableHead>
-                    <TableHead className="w-[140px]">Fabricante</TableHead>
-                    <TableHead>Preço</TableHead>
-                    <TableHead>Estoque</TableHead>
-                    <TableHead></TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Marca</TableHead>
+                    <TableHead className="w-[100px]">Unidade</TableHead>
+                    <TableHead className="flex-1 overflow-ellipsis">
+                      Descrição
+                    </TableHead>
+                    <TableHead className="w-[300px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

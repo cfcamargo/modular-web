@@ -25,14 +25,11 @@ export default function ProductTableRow({
 }: ClientTableRowProps) {
   return (
     <TableRow>
-      <TableCell className="font-mono text-xs font-medium">
-        {product.id}
-      </TableCell>
       <TableCell className="text-muted-foreground">{product.name}</TableCell>
-      <TableCell>{product.brand}</TableCell>
-      <TableCell className="font-medium">{product.price}</TableCell>
-      <TableCell className="font-medium">{product.quantity}</TableCell>
-      <TableCell className="flex gap-4 items-center">
+      <TableCell className="text-muted-foreground">{product.brand}</TableCell>
+      <TableCell className="text-left">{product.unit}</TableCell>
+      <TableCell className="text-left">{product.description}</TableCell>
+      <TableCell className="flex gap-2 items-center justify-start">
         <Button variant="outline" asChild size="xs">
           <Link to={`/products/${product.id}`}>
             <Search className="h-3 w-3" />
