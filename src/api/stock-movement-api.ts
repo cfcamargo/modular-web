@@ -21,7 +21,7 @@ class StockMovementApi {
     if (filters?.from) params.append('from', filters.from);
     if (filters?.to) params.append('to', filters.to);
     if (filters?.page) params.append('page', filters.page.toString());
-    if (filters?.pageSize) params.append('pageSize', filters.pageSize.toString());
+    if (filters?.perPage) params.append('perPage', filters.perPage.toString());
 
     const response = await api.get(`${this.baseRoute}?${params.toString()}`);
     return response.data;

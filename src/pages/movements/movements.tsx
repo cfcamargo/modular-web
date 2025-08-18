@@ -82,7 +82,7 @@ export function Movements() {
       const response = await stockMovementApi.getMovements({
         ...filters,
         page,
-        pageSize: 20,
+        perPage: 20,
       });
       let metaData: MetaProps = {
         lastPage: response.totalPages,

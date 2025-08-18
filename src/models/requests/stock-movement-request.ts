@@ -24,5 +24,5 @@ export interface StockMovementFilterRequest {
   from?: string;
   to?: string;
   page?: number;
-  pageSize?: number;
+  perPage?: number;
 }
