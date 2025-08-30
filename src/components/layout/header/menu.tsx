@@ -45,10 +45,10 @@ const menuItems: MenuItem[] = [
         path: "/movements",
         name: "Movimentações",
       },
-      // {
-      //   path: "/production",
-      //   name: "Produção",
-      // },
+      {
+        path: "/supplier",
+        name: "Fornecedores",
+      },
     ],
   },
   {

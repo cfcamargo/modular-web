@@ -1,8 +1,5 @@
-"use client";
-
 import type React from "react";
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -14,12 +11,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ProductCombobox } from "@/components/product-combobox";
-import { SupplierCombobox } from "@/components/supplier-combobox";
-import { useToast } from "@/hooks/use-toast";
-import { Package, TrendingUp, TrendingDown, Settings } from "lucide-react";
+import {
+  Package,
+  TrendingUp,
+  TrendingDown,
+  Settings,
+  ArrowLeft,
+} from "lucide-react";
+import { toast } from "sonner";
+import { InputAutoComplete } from "@/components/shared/input-auto-complete";
+import { SupplierCombobox } from "./components/supplier-combox";
+import { ProductApi } from "@/api/product-api";
+import { ProductResponse } from "@/models/responses/product-response";
+import { Link } from "react-router-dom";
 
-type MovementType = "entrada" | "saida" | "ajuste";
+const productApi = new ProductApi();
+
+type MovementType = "entry" | "exit" | "adjustment";
 
 interface MovementData {
   type: MovementType;
@@ -32,9 +40,9 @@ interface MovementData {
 }
 
 export function StockMovementForm() {
-  const [movementType, setMovementType] = useState<MovementType>("entrada");
+  const [movementType, setMovementType] = useState<MovementType>("entry");
   const [formData, setFormData] = useState<MovementData>({
-    type: "entrada",
+    type: "entry",
     productId: "",
     quantity: 0,
     costValue: 0,
@@ -43,7 +51,35 @@ export function StockMovementForm() {
     description: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [products, setProducts] = useState<ProductResponse[]>([]);
+  const [productSearch, setProductSearch] = useState("");
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductResponse | null>(null);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    try {
+      const response = await productApi.get({
+        page: 1,
+        perPage: 100,
+        searchTerm: "",
+      });
+      setProducts(response.data.data);
+    } catch (error) {
+      toast.error("Erro ao carregar produtos");
+    }
+  };
+
+  const handleProductSelect = (product: ProductResponse | null) => {
+    setSelectedProduct(product);
+    setFormData((prev) => ({
+      ...prev,
+      productId: product ? product.id.toString() : "",
+    }));
+  };
 
   const handleTypeChange = (type: MovementType) => {
     setMovementType(type);
@@ -51,11 +87,13 @@ export function StockMovementForm() {
       type,
       productId: "",
       quantity: 0,
-      costValue: type === "entrada" ? 0 : undefined,
-      saleValue: type === "entrada" ? 0 : undefined,
-      supplierId: type === "entrada" ? "" : undefined,
+      costValue: type === "entry" ? 0 : undefined,
+      saleValue: type === "entry" ? 0 : undefined,
+      supplierId: type === "entry" ? "" : undefined,
       description: "",
     });
+    setSelectedProduct(null);
+    setProductSearch("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,56 +103,37 @@ export function StockMovementForm() {
     try {
       // Validações básicas
       if (!formData.productId) {
-        toast({
-          title: "Erro",
-          description: "Selecione um produto",
-          variant: "destructive",
-        });
+        toast.error("Selecione um produto");
         return;
       }
 
       if (formData.quantity <= 0) {
-        toast({
-          title: "Erro",
-          description: "Quantidade deve ser maior que zero",
-          variant: "destructive",
-        });
+        toast.error("Quantidade deve ser maior que zero");
         return;
       }
 
-      if (movementType === "entrada" && !formData.supplierId) {
-        toast({
-          title: "Erro",
-          description: "Selecione um fornecedor para entrada",
-          variant: "destructive",
-        });
+      if (movementType === "entry" && !formData.supplierId) {
+        toast.error("Selecione um fornecedor para entrada");
         return;
       }
 
       // Simular envio para API
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      toast({
-        title: "Sucesso!",
-        description: `Movimentação de ${movementType} registrada com sucesso`,
-      });
+      toast.success(`Movimentação de ${movementType} registrada com sucesso`);
 
       // Reset form
       setFormData({
         type: movementType,
         productId: "",
         quantity: 0,
-        costValue: movementType === "entrada" ? 0 : undefined,
-        saleValue: movementType === "entrada" ? 0 : undefined,
-        supplierId: movementType === "entrada" ? "" : undefined,
+        costValue: movementType === "entry" ? 0 : undefined,
+        saleValue: movementType === "entry" ? 0 : undefined,
+        supplierId: movementType === "entry" ? "" : undefined,
         description: "",
       });
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao registrar movimentação",
-        variant: "destructive",
-      });
+      toast.error("Erro ao registrar movimentação");
     } finally {
       setIsSubmitting(false);
     }
@@ -122,38 +141,34 @@ export function StockMovementForm() {
 
   const getIcon = (type: MovementType) => {
     switch (type) {
-      case "entrada":
+      case "entry":
         return <TrendingUp className="h-4 w-4" />;
-      case "saida":
+      case "exit":
         return <TrendingDown className="h-4 w-4" />;
-      case "ajuste":
+      case "adjustment":
         return <Settings className="h-4 w-4" />;
     }
   };
 
-  const getCardColor = (type: MovementType) => {
-    switch (type) {
-      case "entrada":
-        return "border-green-200 bg-green-50/50";
-      case "saida":
-        return "border-red-200 bg-red-50/50";
-      case "ajuste":
-        return "border-blue-200 bg-blue-50/50";
-    }
-  };
-
   return (
-    <Card
-      className={`${getCardColor(movementType)} transition-colors duration-200`}
-    >
+    <Card className={`transition-colors duration-200`}>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          Movimentação de Estoque
-        </CardTitle>
-        <CardDescription>
-          Registre entradas, saídas e ajustes no seu estoque
-        </CardDescription>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" asChild>
+            <Link to="/movements">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Movimentação de Estoque
+            </CardTitle>
+            <CardDescription>
+              Registre entradas, saídas e ajustes no seu estoque
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -161,7 +176,7 @@ export function StockMovementForm() {
           <div className="space-y-2">
             <Label>Tipo de Movimentação</Label>
             <div className="grid grid-cols-3 gap-3">
-              {(["entrada", "saida", "ajuste"] as MovementType[]).map(
+              {(["entry", "exit", "adjustment"] as MovementType[]).map(
                 (type) => (
                   <Button
                     key={type}
@@ -171,7 +186,11 @@ export function StockMovementForm() {
                     className="flex items-center gap-2 capitalize"
                   >
                     {getIcon(type)}
-                    {type}
+                    {type === "entry"
+                      ? "Entrada"
+                      : type === "exit"
+                      ? "Saída"
+                      : "Ajuste"}
                   </Button>
                 )
               )}
@@ -181,11 +200,18 @@ export function StockMovementForm() {
           {/* Seleção do Produto */}
           <div className="space-y-2">
             <Label htmlFor="product">Produto *</Label>
-            <ProductCombobox
-              value={formData.productId}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, productId: value }))
-              }
+            <InputAutoComplete
+              placeholder="Buscar produto..."
+              value={productSearch}
+              onChange={setProductSearch}
+              onSelect={handleProductSelect}
+              options={products}
+              selectedOption={selectedProduct}
+              debounceMs={300}
+              maxResults={10}
+              emptyMessage="Nenhum produto encontrado"
+              allOptionLabel="Todos os produtos"
+              clearOnSelect={true}
             />
           </div>
 
@@ -209,7 +235,7 @@ export function StockMovementForm() {
           </div>
 
           {/* Campos específicos para ENTRADA */}
-          {movementType === "entrada" && (
+          {movementType === "entry" && (
             <>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -261,19 +287,19 @@ export function StockMovementForm() {
           )}
 
           {/* Campo de Valor para SAÍDA */}
-          {movementType === "saida" && (
+          {movementType === "exit" && (
             <div className="space-y-2">
-              <Label htmlFor="value">Valor</Label>
+              <Label htmlFor="saleValue">Valor</Label>
               <Input
-                id="value"
+                id="saleValue"
                 type="number"
                 min="0"
                 step="0.01"
-                value={formData.costValue || ""}
+                value={formData.saleValue || ""}
                 onChange={(e) =>
                   setFormData((prev) => ({
                     ...prev,
-                    costValue: Number.parseFloat(e.target.value) || 0,
+                    saleValue: Number.parseFloat(e.target.value) || 0,
                   }))
                 }
                 placeholder="0,00"
@@ -284,7 +310,7 @@ export function StockMovementForm() {
           {/* Descrição (opcional para todos os tipos) */}
           <div className="space-y-2">
             <Label htmlFor="description">
-              Descrição {movementType !== "ajuste" && "(opcional)"}
+              Descrição {movementType !== "adjustment" && "(opcional)"}
             </Label>
             <Textarea
               id="description"

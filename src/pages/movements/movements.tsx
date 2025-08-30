@@ -1,8 +1,9 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Filter, X, Search } from "lucide-react";
+import { Plus, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { InputAutoComplete } from "@/components/shared/input-auto-complete";
 import {
   Select,
   SelectContent,
@@ -53,7 +54,6 @@ export function Movements() {
   const [productSearch, setProductSearch] = useState("");
   const [selectedProduct, setSelectedProduct] =
     useState<ProductResponse | null>(null);
-  const [showProductDropdown, setShowProductDropdown] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -148,23 +148,12 @@ export function Movements() {
     setSelectedProduct(null);
   };
 
-  const filteredProducts = useMemo(() => {
-    if (!productSearch) return []; // Não mostra produtos se não há busca
-    return products
-      .filter((product) =>
-        product.name.toLowerCase().includes(productSearch.toLowerCase())
-      )
-      .slice(0, 10); // Limita a 10 resultados
-  }, [products, productSearch]);
-
   const handleProductSelect = (product: ProductResponse | null) => {
     setSelectedProduct(product);
     setFilters((prev) => ({
       ...prev,
       productId: product ? product.id.toString() : "",
     }));
-    setProductSearch(""); // Limpa o campo de busca após seleção
-    setShowProductDropdown(false);
   };
 
   const hasActiveFilters =
@@ -218,56 +207,19 @@ export function Movements() {
                     <label className="text-sm font-medium mb-1 block">
                       Produto
                     </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Buscar produto..."
-                        value={productSearch}
-                        onChange={(e) => {
-                          setProductSearch(e.target.value);
-                          setShowProductDropdown(true);
-                          if (!e.target.value) {
-                            handleProductSelect(null);
-                          }
-                        }}
-                        onFocus={() => setShowProductDropdown(true)}
-                        onBlur={() =>
-                          setTimeout(() => setShowProductDropdown(false), 200)
-                        }
-                        className="pl-10"
-                      />
-                      {showProductDropdown && productSearch && (
-                        <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-                          <div className="p-2">
-                            <div
-                              className="px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm"
-                              onClick={() => handleProductSelect(null)}
-                            >
-                              Todos os produtos
-                            </div>
-                            {filteredProducts.map((product) => (
-                              <div
-                                key={product.id}
-                                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm"
-                                onClick={() => handleProductSelect(product)}
-                              >
-                                {product.name}
-                              </div>
-                            ))}
-                            {filteredProducts.length === 0 && (
-                              <div className="px-3 py-2 text-sm text-muted-foreground">
-                                Nenhum produto encontrado
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {selectedProduct && (
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        Selecionado: {selectedProduct.name}
-                      </div>
-                    )}
+                    <InputAutoComplete
+                      placeholder="Buscar produto..."
+                      value={productSearch}
+                      onChange={setProductSearch}
+                      onSelect={handleProductSelect}
+                      options={products}
+                      selectedOption={selectedProduct}
+                      debounceMs={300}
+                      maxResults={10}
+                      emptyMessage="Nenhum produto encontrado"
+                      allOptionLabel="Todos os produtos"
+                      clearOnSelect={true}
+                    />
                   </div>
 
                   <div>
