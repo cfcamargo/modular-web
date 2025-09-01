@@ -20,10 +20,10 @@ import { useUserLoggedStore } from "@/store/auth/user-logged.ts";
 import { toast } from "sonner";
 import DetailsProduct from "./pages/products/details-product";
 import { Movements } from "./pages/movements/movements";
-import { NewMovement } from "./pages/movements/new-movement";
 import Supplier from "./pages/supplier/supplier";
 import NewSupplier from "./pages/supplier/new-supplier";
 import SupplierDetails from "./pages/supplier/supplier-details";
+import NewMovement from "./pages/movements/new-movement";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);

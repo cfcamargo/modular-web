@@ -5,10 +5,10 @@ export function AuthLayout() {
   return (
     <div className="min-h-screen grid grid-cols-2 antialiased">
       <div className="h-full bg-muted text-muted-foreground flex flex-col justify-between bg-[url('/bg.jpg')] bg-cover bg-center">
-        <div className="h-full p-10 flex flex-col justify-between bg-white/70">
+        <div className="h-full p-10 flex flex-col justify-between bg-primary dark:bg-zinc-900">
           <div className="flex items-center gap-3 text-lg text-foreground">
             <Building2 className="w-5 h-5" />
-            <span className="font-semibold">Modular Pré Moldados</span>
+            <span className="font-semibold text-foreground">Modular Pré Moldados</span>
           </div>
           <footer className="text-sm">
             Painel administrativo &copy; Modular - {new Date().getFullYear()}

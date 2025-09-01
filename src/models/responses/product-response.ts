@@ -1,11 +1,16 @@
+type Unit = "UN" | "M2" | "KG"
+
 export interface ProductResponse {
-  id: number;
+  id: string;
   name: string;
   brand: string;
-  status: number;
+  unit: Unit;
   description: string;
-  unit: string;
-  marginPercent: number;
+  status: number;
+  marginPercent?: string;
+  stockOnHand: number;
+  avgUnitCost: number;
   createdAt: string;
   updatedAt: string;
+  updatedBy?: string | null;
 }

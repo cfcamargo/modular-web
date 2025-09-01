@@ -1,143 +1,94 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  ArrowLeft,
-  Package,
-  TrendingUp,
-  TrendingDown,
-  Settings,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
-import { stockMovementApi } from "@/api/stock-movement-api";
-import { ProductApi } from "@/api/product-api";
+"use client"
 
-const productApi = new ProductApi();
-import { ProductResponse } from "@/models/responses/product-response";
-import { StockMovementForm } from "./stock-movement-form";
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, Package, AlertTriangle } from "lucide-react"
+import { toast } from "sonner"
+import { ProductResponse } from "@/models/responses/product-response"
+import { InputAutoComplete } from "@/components/shared/input-auto-complete"
+import { productApi } from "@/api"
 
-// Schemas de validação
-const entrySchema = z.object({
-  productId: z.string().min(1, "Produto é obrigatório"),
-  quantity: z
-    .string()
-    .min(1, "Quantidade é obrigatória")
-    .refine(
-      (val) =>
-        !isNaN(parseFloat(val.replace(",", "."))) &&
-        parseFloat(val.replace(",", ".")) > 0,
-      "Quantidade deve ser um número positivo"
-    ),
-  unitCost: z.number().min(0.01, "Custo unitário é obrigatório"),
-  description: z.string().optional(),
-});
+// Types
+type StockMovementType = "PURCHASE" | "SALE" | "ADJUST_IN" | "ADJUST_OUT" | "RETURN_TO_SUPPLIER" | "RETURN_FROM_CLIENT"
 
-const exitSchema = z.object({
-  productId: z.string().min(1, "Produto é obrigatório"),
-  quantity: z
-    .string()
-    .min(1, "Quantidade é obrigatória")
-    .refine(
-      (val) =>
-        !isNaN(parseFloat(val.replace(",", "."))) &&
-        parseFloat(val.replace(",", ".")) > 0,
-      "Quantidade deve ser um número positivo"
-    ),
-  unitSalePrice: z.number().optional(),
-  description: z.string().optional(),
-});
 
-const adjustSchema = z.object({
-  productId: z.string().min(1, "Produto é obrigatório"),
-  targetQuantity: z
-    .string()
-    .min(1, "Quantidade alvo é obrigatória")
-    .refine(
-      (val) =>
-        !isNaN(parseFloat(val.replace(",", "."))) &&
-        parseFloat(val.replace(",", ".")) >= 0,
-      "Quantidade alvo deve ser um número válido"
-    ),
-  description: z.string().optional(),
-});
 
-type EntryFormData = z.infer<typeof entrySchema>;
-type ExitFormData = z.infer<typeof exitSchema>;
-type AdjustFormData = z.infer<typeof adjustSchema>;
+interface Supplier {
+  id: string
+  name: string
+}
 
-export function NewMovement() {
-  const navigate = useNavigate();
-  const [products, setProducts] = useState<ProductResponse[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("entry");
+interface StockMovementFormData {
+  productId: string
+  type: StockMovementType
+  quantity: number
+  unitCost?: number
+  unitSalePrice?: number
+  supplierId?: string
+  description?: string
+}
 
-  const entryForm = useForm<EntryFormData>({
-    resolver: zodResolver(entrySchema),
-    defaultValues: {
-      productId: "",
-      quantity: "",
-      unitCost: 0,
-      description: "",
-    },
-  });
+const mockSuppliers: Supplier[] = [
+  { id: "1", name: "Fornecedor Tech Ltda" },
+  { id: "2", name: "Distribuidora Digital" },
+  { id: "3", name: "Importadora Global" },
+]
 
-  const exitForm = useForm<ExitFormData>({
-    resolver: zodResolver(exitSchema),
-    defaultValues: {
-      productId: "",
-      quantity: "",
-      unitSalePrice: 0,
-      description: "",
-    },
-  });
+const movementTypeConfig = {
+  PURCHASE: { label: "Compra", color: "bg-green-100 text-green-800", isEntry: true },
+  SALE: { label: "Venda", color: "bg-red-100 text-red-800", isEntry: false },
+  ADJUST_IN: { label: "Ajuste Entrada", color: "bg-blue-100 text-blue-800", isEntry: true },
+  ADJUST_OUT: { label: "Ajuste Saída", color: "bg-orange-100 text-orange-800", isEntry: false },
+  RETURN_TO_SUPPLIER: { label: "Devolução p/ Fornecedor", color: "bg-purple-100 text-purple-800", isEntry: false },
+  RETURN_FROM_CLIENT: { label: "Devolução de Cliente", color: "bg-teal-100 text-teal-800", isEntry: true },
+}
 
-  const adjustForm = useForm<AdjustFormData>({
-    resolver: zodResolver(adjustSchema),
-    defaultValues: {
-      productId: "",
-      targetQuantity: "",
-      description: "",
-    },
-  });
+export default function NewMovement() {
+  const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+
+  const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null)
+  const [products, setProducts] = useState<ProductResponse[]>([])
+  const [productSearch, setProductSearch] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+    reset,
+  } = useForm<StockMovementFormData>()
+
+  const watchedType = watch("type")
+  const watchedQuantity = watch("quantity")
+  const watchedProductId = watch("productId")
+
+  // Update selected product when productId changes
+  const handleProductSelect = (product: ProductResponse | null) => {
+    if (product) {
+      setSelectedProduct(product)
+      setValue("productId", product.id)
+    } else {
+      setSelectedProduct(null)
+      setValue("productId", "")
+    }
+  }
 
   const loadProducts = async () => {
     try {
       const response = await productApi.get({
         page: 1,
-        perPage: 100,
-        searchTerm: "",
+        perPage: 30,
+        searchTerm: productSearch,
       });
       setProducts(response.data.data);
     } catch (error) {
@@ -145,62 +96,236 @@ export function NewMovement() {
     }
   };
 
-  const onSubmitEntry = async (data: EntryFormData) => {
-    try {
-      setLoading(true);
-      await stockMovementApi.createEntry({
-        productId: data.productId,
-        quantity: parseFloat(data.quantity.replace(",", ".")),
-        unitCost: data.unitCost,
-        description: data.description,
-      });
-      toast.success("Entrada registrada com sucesso!");
-      navigate("/movements");
-    } catch (error) {
-      toast.error("Erro ao registrar entrada");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    loadProducts();
+  }, [productSearch]);
 
-  const onSubmitExit = async (data: ExitFormData) => {
-    try {
-      setLoading(true);
-      await stockMovementApi.createExit({
-        productId: data.productId,
-        quantity: parseFloat(data.quantity.replace(",", ".")),
-        unitSalePrice: data.unitSalePrice,
-        description: data.description,
-      });
-      toast.success("Saída registrada com sucesso!");
-      navigate("/movements");
-    } catch (error) {
-      toast.error("Erro ao registrar saída");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Calculate suggested sale price
+  const getSuggestedSalePrice = () => {
+    if (!selectedProduct) return 0
+    // return selectedProduct. * (1 + selectedProduct.marginPercent)
+    return 10
+  }
 
-  const onSubmitAdjust = async (data: AdjustFormData) => {
+  // Check if movement type requires supplier
+  const requiresSupplier = watchedType === "PURCHASE" || watchedType === "RETURN_TO_SUPPLIER"
+
+  // Check if it's an entry or exit movement
+  const isEntryMovement = watchedType ? movementTypeConfig[watchedType].isEntry : false
+
+  // Check stock availability for exit movements
+  const hasInsufficientStock = !isEntryMovement && selectedProduct && watchedQuantity > selectedProduct.stockOnHand
+
+  const onSubmit = async (data: StockMovementFormData) => {
+    setIsLoading(true)
+
     try {
-      setLoading(true);
-      await stockMovementApi.createAdjust({
-        productId: data.productId,
-        targetQuantity: parseFloat(data.targetQuantity.replace(",", ".")),
-        description: data.description,
-      });
-      toast.success("Ajuste registrado com sucesso!");
-      navigate("/movements");
+      // Mock API call
+      console.log("Dados do formulário:", {
+        ...data,
+        product: selectedProduct,
+        suggestedSalePrice: getSuggestedSalePrice(),
+      })
+
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+
+      toast.success(`${movementTypeConfig[data.type].label} de ${data.quantity} unidades registrada.`,)
+
+      reset()
+      setSelectedProduct(null)
     } catch (error) {
-      toast.error("Erro ao registrar ajuste");
+      toast.error("Tente novamente em alguns instantes.")
     } finally {
-      setLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
-    <div>
-      <StockMovementForm />
-    </div>
-  );
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Package className="h-5 w-5" />
+          Nova Movimentação de Estoque
+        </CardTitle>
+        <CardDescription>Registre entradas e saídas de produtos no estoque</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Product Selection */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="product">Produto *</Label>
+              <InputAutoComplete
+                placeholder="Buscar produto..."
+                value={productSearch}
+                onChange={setProductSearch}
+                onSelect={handleProductSelect}
+                options={products}
+                selectedOption={selectedProduct}
+                debounceMs={300}
+                maxResults={10}
+                emptyMessage="Nenhum produto encontrado"
+                allOptionLabel="Todos os produtos"
+                clearOnSelect={true}
+              />
+            </div>
+
+            {/* Movement Type */}
+            <div className="space-y-2">
+              <Label htmlFor="type">Tipo de Movimentação *</Label>
+              <Select onValueChange={(value) => setValue("type", value as StockMovementType)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(movementTypeConfig).map(([key, config]) => (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center gap-2">
+                        <Badge className={config.color}>{config.label}</Badge>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.type && <p className="text-sm text-destructive">Tipo é obrigatório</p>}
+            </div>
+          </div>
+
+          {/* Product Info Display */}
+          {selectedProduct && (
+            <Card className="bg-muted/50">
+              <CardContent className="pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium">Produto:</span>
+                    <p className="text-muted-foreground">{selectedProduct.name}</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Estoque Atual:</span>
+                    <p className="text-muted-foreground">{selectedProduct.stockOnHand ?? 0} unidades</p>
+                  </div>
+                  <div>
+                    <span className="font-medium">Custo Médio:</span>
+                    {/* <p className="text-muted-foreground">R$ {selectedProduct.avgUnitCost?.toFixed(2) ?? 0}</p> */}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quantity and Price */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="quantity">Quantidade{selectedProduct && `(${selectedProduct.unit})`} *</Label>
+              <Input
+                id="quantity"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="Digite a quantidade"
+                {...register("quantity", {
+                  required: "Quantidade é obrigatória",
+                  min: { value: 1, message: "Quantidade deve ser maior que 0" },
+                })}
+              />
+              {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+              {hasInsufficientStock && (
+                <Alert className="border-orange-200 bg-orange-50">
+                  <AlertTriangle className="h-4 w-4 text-orange-600" />
+                  <AlertDescription className="text-orange-800">
+                    Estoque insuficiente! Disponível: {selectedProduct?.stockOnHand} unidades
+                  </AlertDescription>
+                </Alert>
+              )}
+            </div>
+
+            {/* Unit Cost/Price */}
+            <div className="space-y-2">
+              {isEntryMovement ? (
+                <>
+                  <Label htmlFor="unitCost">Custo Unitário *</Label>
+                  <Input
+                    id="unitCost"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="R$ 0,00"
+                    {...register("unitCost", {
+                      required: "Custo unitário é obrigatório para entradas",
+                    })}
+                  />
+                  {errors.unitCost && <p className="text-sm text-destructive">{errors.unitCost.message}</p>}
+                </>
+              ) : (
+                <>
+                  <Label htmlFor="unitSalePrice">Preço de Venda</Label>
+                  <Input
+                    id="unitSalePrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder={selectedProduct ? `R$ ${getSuggestedSalePrice().toFixed(2)} (sugerido)` : "R$ 0,00"}
+                    {...register("unitSalePrice")}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Opcional. Se não informado, será usado o preço sugerido baseado na margem.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Supplier (conditional) */}
+          {requiresSupplier && (
+            <div className="space-y-2">
+              <Label htmlFor="supplierId">Fornecedor *</Label>
+              <Select onValueChange={(value) => setValue("supplierId", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione um fornecedor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockSuppliers.map((supplier) => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="description">Descrição</Label>
+            <Textarea
+              id="description"
+              placeholder="Observações sobre a movimentação (opcional)"
+              rows={3}
+              {...register("description")}
+            />
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <Button type="submit" disabled={isLoading || !!hasInsufficientStock} className="flex-1">
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Salvar Movimentação
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                reset()
+                setSelectedProduct(null)
+              }}
+              className="flex-1"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  )
 }

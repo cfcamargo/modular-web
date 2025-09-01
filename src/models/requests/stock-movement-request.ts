@@ -1,28 +1,25 @@
-export interface StockMovementEntryRequest {
-  productId: string;
-  quantity: number;
-  unitCost: number;
-  description?: string;
+export enum StockMovementType {
+  PURCHASE = 'PURCHASE',
+  SALE = 'SALE',
+  ADJUST_IN = 'ADJUST_IN',
+  ADJUST_OUT = 'ADJUST_OUT',
+  RETURN_TO_SUPPLIER = 'RETURN_TO_SUPPLIER',
+  RETURN_FROM_CLIENT = 'RETURN_FROM_CLIENT',
+  // TRANSFER_* mantidos só se existirem no back
+  TRANSFER_OUT = 'TRANSFER_OUT',
+  TRANSFER_IN = 'TRANSFER_IN',
 }
 
-export interface StockMovementExitRequest {
+export interface CreateStockMovementRequest {
   productId: string;
-  quantity: number;
-  unitSalePrice?: number;
+  type: StockMovementType;
+  quantity: string;            // ex.: "10.0000" – SEMPRE na unidade do produto
+  unitCost?: string;           // ex.: "12.500000"
+  unitSalePrice?: string;      // ex.: "19.900000"
+  marginPct?: string;          // ex.: "30.00" (30%)
   description?: string;
-}
-
-export interface StockMovementAdjustRequest {
-  productId: string;
-  targetQuantity: number;
-  description?: string;
-}
-
-export interface StockMovementFilterRequest {
-  productId?: string;
-  type?: 'ENTRY' | 'EXIT' | 'ADJUSTMENT';
-  from?: string;
-  to?: string;
-  page?: number;
-  perPage?: number;
+  userId: string;
+  supplierId?: string;         // usar em PURCHASE e RETURN_TO_SUPPLIER
+  originType?: string;         // "ORDER" | "INVOICE" | "MANUAL" | "REVERSAL"
+  originId?: string;
 }
