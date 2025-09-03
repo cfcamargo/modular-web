@@ -39,7 +39,7 @@ const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
   brand: z.string().min(1, "Marca é obrigatória"),
   marginPercent: z.string().min(1, "Margem percentual é obrigatória"),
-  description: z.string().min(1, "Descrição é obrigatória"),
+  description: z.string().optional(),
   unit: z.enum(["KG", "UN", "M2"], {
     required_error: "Unidade de medida é obrigatória",
   }),
@@ -131,7 +131,7 @@ export default function ProductForm() {
       };
 
       if (isEditing && id) {
-        await productApi.update(productData, Number(id));
+        await productApi.update(productData, id);
         toast.success("Produto atualizado com sucesso!");
       } else {
         await productApi.save(productData);

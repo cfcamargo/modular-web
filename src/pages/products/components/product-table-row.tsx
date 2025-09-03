@@ -28,6 +28,7 @@ export default function ProductTableRow({
       <TableCell className="text-muted-foreground">{product.name}</TableCell>
       <TableCell className="text-muted-foreground">{product.brand}</TableCell>
       <TableCell className="text-left">{product.unit}</TableCell>
+      <TableCell className="text-left">{product.stockOnHand}</TableCell>
       <TableCell className="text-left">{product.description}</TableCell>
       <TableCell className="flex gap-2 items-center justify-start">
         <Button variant="outline" asChild size="xs">

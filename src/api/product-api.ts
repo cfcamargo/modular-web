@@ -30,7 +30,7 @@ export class ProductApi {
 
   update(
     request: ProductRequest,
-    id: number
+    id: string
   ): Promise<{ data: { product: ProductResponse } }> {
     return api.patch(`${baseURL}/${id}`, request);
   }

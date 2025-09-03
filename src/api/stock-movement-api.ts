@@ -1,19 +1,16 @@
 import { api } from "@/lib/axios";
 import {
-  StockMovementEntryRequest,
-  StockMovementExitRequest,
-  StockMovementAdjustRequest,
-  StockMovementFilterRequest,
+  CreateStockMovementRequest,
 } from "@/models/requests/stock-movement-request";
 import {
-  StockMovementResponse,
+  MovementReponse,
   StockMovementListResponse,
 } from "@/models/responses/stock-movement-response";
 
 class StockMovementApi {
   private baseRoute = "/stock-movements";
 
-  async getMovements(filters?: StockMovementFilterRequest): Promise<StockMovementListResponse> {
+  async getMovements(filters?: any): Promise<StockMovementListResponse> {
     const params = new URLSearchParams();
     
     if (filters?.productId) params.append('productId', filters.productId);
@@ -27,33 +24,8 @@ class StockMovementApi {
     return response.data;
   }
 
-  async createEntry(data: StockMovementEntryRequest): Promise<StockMovementResponse> {
-    const response = await api.post(`${this.baseRoute}/entry`, {
-      productId: data.productId,
-      quantity: data.quantity,
-      unitCost: data.unitCost,
-      description: data.description || undefined,
-    });
-    return response.data;
-  }
-
-  async createExit(data: StockMovementExitRequest): Promise<StockMovementResponse> {
-    const response = await api.post(`${this.baseRoute}/exit`, {
-      productId: data.productId,
-      quantity: data.quantity,
-      unitSalePrice: data.unitSalePrice || undefined,
-      description: data.description || undefined,
-    });
-    return response.data;
-  }
-
-  async createAdjust(data: StockMovementAdjustRequest): Promise<StockMovementResponse> {
-    const response = await api.post(`${this.baseRoute}/adjust`, {
-      productId: data.productId,
-      targetQuantity: data.targetQuantity,
-      description: data.description || undefined,
-    });
-    return response.data;
+  async createMovement(request: CreateStockMovementRequest): Promise<MovementReponse>{
+    return await api.post(this.baseRoute, request)
   }
 }
 

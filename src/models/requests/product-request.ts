@@ -2,6 +2,6 @@ export interface ProductRequest {
   name: string;
   brand: string;
   unit: "KG" | "UN" | "M2";
-  description: string
+  description?: string
   marginPercent: number
 }

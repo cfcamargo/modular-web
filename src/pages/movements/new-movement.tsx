@@ -15,9 +15,11 @@ import { toast } from "sonner"
 import { ProductResponse } from "@/models/responses/product-response"
 import { InputAutoComplete } from "@/components/shared/input-auto-complete"
 import { productApi } from "@/api"
-
-// Types
-type StockMovementType = "PURCHASE" | "SALE" | "ADJUST_IN" | "ADJUST_OUT" | "RETURN_TO_SUPPLIER" | "RETURN_FROM_CLIENT"
+import { stockMovementApi } from "@/api/stock-movement-api"
+import { StockMovementType } from "@/models/common/stockMovementType"
+import { CreateStockMovementRequest } from "@/models/requests/stock-movement-request"
+import { StockMovementTypeEnum } from "@/utils/enums/StockMovementTypeEnum"
+import { useUserLoggedStore } from "@/store/auth/user-logged"
 
 
 
@@ -68,9 +70,10 @@ export default function NewMovement() {
     reset,
   } = useForm<StockMovementFormData>()
 
+  const { user } = useUserLoggedStore()
+
   const watchedType = watch("type")
   const watchedQuantity = watch("quantity")
-  const watchedProductId = watch("productId")
 
   // Update selected product when productId changes
   const handleProductSelect = (product: ProductResponse | null) => {
@@ -103,8 +106,8 @@ export default function NewMovement() {
   // Calculate suggested sale price
   const getSuggestedSalePrice = () => {
     if (!selectedProduct) return 0
-    // return selectedProduct. * (1 + selectedProduct.marginPercent)
-    return 10
+    // return selectedProduct.avgUnitCost * (selectedProduct.marginPercent ?  selectedProduct.marginPercent + 1 : 0)
+    return 0
   }
 
   // Check if movement type requires supplier
@@ -118,20 +121,23 @@ export default function NewMovement() {
 
   const onSubmit = async (data: StockMovementFormData) => {
     setIsLoading(true)
+    console.log(data)
+
+    const request: CreateStockMovementRequest = {
+      productId: data.productId,
+      quantity: String(data.quantity),
+      type: StockMovementTypeEnum[data.type],
+      description: data.description,
+      //TODO : change to supllier id
+      supplierId: "cmf4ktjqr0000wc0wbhih3qcp",
+      unitCost: String(data.unitCost),
+      unitSalePrice: String(data.unitSalePrice),
+      userId: user!.id
+    }
 
     try {
-      // Mock API call
-      console.log("Dados do formulário:", {
-        ...data,
-        product: selectedProduct,
-        suggestedSalePrice: getSuggestedSalePrice(),
-      })
-
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      toast.success(`${movementTypeConfig[data.type].label} de ${data.quantity} unidades registrada.`,)
-
+      await stockMovementApi.createMovement(request)
+      toast.success(`Unidades registrada.`,)
       reset()
       setSelectedProduct(null)
     } catch (error) {
@@ -215,7 +221,7 @@ export default function NewMovement() {
           )}
 
           {/* Quantity and Price */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-2">
               <Label htmlFor="quantity">Quantidade{selectedProduct && `(${selectedProduct.unit})`} *</Label>
               <Input
@@ -253,6 +259,40 @@ export default function NewMovement() {
                     placeholder="R$ 0,00"
                     {...register("unitCost", {
                       required: "Custo unitário é obrigatório para entradas",
+                    })}
+                  />
+                  {errors.unitCost && <p className="text-sm text-destructive">{errors.unitCost.message}</p>}
+                </>
+              ) : (
+                <>
+                  <Label htmlFor="unitSalePrice">Preço de Venda</Label>
+                  <Input
+                    id="unitSalePrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder={selectedProduct ? `R$ ${getSuggestedSalePrice().toFixed(2)} (sugerido)` : "R$ 0,00"}
+                    {...register("unitSalePrice")}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Opcional. Se não informado, será usado o preço sugerido baseado na margem.
+                  </p>
+                </>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              {isEntryMovement ? (
+                <>
+                  <Label htmlFor="unitCost">Preço de venda *</Label>
+                  <Input
+                    id="unitSalePrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="R$ 0,00"
+                    {...register("unitSalePrice", {
+                      required: "Preco venda é obrigatório para entradas",
                     })}
                   />
                   {errors.unitCost && <p className="text-sm text-destructive">{errors.unitCost.message}</p>}

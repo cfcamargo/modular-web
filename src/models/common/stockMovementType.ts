@@ -1,0 +1,11 @@
+export enum StockMovementType {
+  PURCHASE = 'PURCHASE',
+  SALE = 'SALE',
+  ADJUST_IN = 'ADJUST_IN',
+  ADJUST_OUT = 'ADJUST_OUT',
+  RETURN_TO_SUPPLIER = 'RETURN_TO_SUPPLIER',
+  RETURN_FROM_CLIENT = 'RETURN_FROM_CLIENT',
+  // TRANSFER_* mantidos só se existirem no back
+  TRANSFER_OUT = 'TRANSFER_OUT',
+  TRANSFER_IN = 'TRANSFER_IN',
+}

@@ -94,6 +94,7 @@ export function Products() {
                     <TableHead>Nome</TableHead>
                     <TableHead>Marca</TableHead>
                     <TableHead className="w-[100px]">Unidade</TableHead>
+                    <TableHead className="w-[100px]">Em estoque</TableHead>
                     <TableHead className="flex-1 overflow-ellipsis">
                       Descrição
                     </TableHead>

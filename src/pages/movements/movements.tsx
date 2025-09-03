@@ -33,21 +33,22 @@ import Pagination from "@/components/shared/pagination";
 import { MetaProps } from "@/models/responses/meta-response";
 
 const productApi = new ProductApi();
-import { StockMovementResponse } from "@/models/responses/stock-movement-response";
 import { ProductResponse } from "@/models/responses/product-response";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { MovementReponse } from "@/models/responses/stock-movement-response";
+import { StockMovementTypeEnum, StockMovementTypeEnumPT } from "@/utils/enums/StockMovementTypeEnum";
+import { StockMovementType } from "@/models/common/stockMovementType";
 
-type MovementType = "ENTRY" | "EXIT" | "ADJUSTMENT";
 
 export function Movements() {
-  const [movements, setMovements] = useState<StockMovementResponse[]>([]);
+  const [movements, setMovements] = useState<MovementReponse[]>([]);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [meta, setMeta] = useState<MetaProps | null>();
   const [filters, setFilters] = useState({
     productId: "",
-    type: undefined as MovementType | undefined,
+    type: undefined as StockMovementTypeEnum | undefined,
     from: "",
     to: "",
   });
@@ -104,13 +105,8 @@ export function Movements() {
     return product?.name || "Produto não encontrado";
   };
 
-  const getMovementTypeLabel = (type: string) => {
-    const types = {
-      ENTRY: "Entrada",
-      EXIT: "Saída",
-      ADJUSTMENT: "Ajuste",
-    };
-    return types[type as keyof typeof types] || type;
+  const getMovementTypeLabel = (type: StockMovementType) => {
+    return StockMovementTypeEnumPT[type]
   };
 
   const getMovementTypeBadge = (type: string) => {
@@ -129,7 +125,7 @@ export function Movements() {
     return quantity.toString();
   };
 
-  const formatCurrency = (value?: number) => {
+  const formatCurrency = (value?: number | null) => {
     if (!value) return "-";
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
@@ -234,7 +230,7 @@ export function Movements() {
                           type:
                             value === "all"
                               ? undefined
-                              : (value as MovementType),
+                              : (value as StockMovementTypeEnum),
                         }))
                       }
                     >
@@ -243,9 +239,12 @@ export function Movements() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos os tipos</SelectItem>
-                        <SelectItem value="ENTRY">Entrada</SelectItem>
-                        <SelectItem value="EXIT">Saída</SelectItem>
-                        <SelectItem value="ADJUSTMENT">Ajuste</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.PURCHASE}>Compra</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.SALE}>Venda</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.ADJUST_IN}>Ajuste Entrada</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.ADJUST_OUT}>Ajuste Saída</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.RETURN_FROM_CLIENT}>Retorno do cliente</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.RETURN_TO_SUPPLIER}>Retorno para fornecedor</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -303,28 +302,16 @@ export function Movements() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data/Hora</TableHead>
                   <TableHead>Produto</TableHead>
-                  <TableHead>Tipo</TableHead>
+                  <TableHead>Tipo de Movimentaçao</TableHead>
                   <TableHead>Quantidade</TableHead>
-                  <TableHead>Custo Unitário</TableHead>
-                  <TableHead>Preço Unitário</TableHead>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Observação</TableHead>
+                  <TableHead>Preço Venda Unitário</TableHead>
+                  <TableHead>Data</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {movements.map((movement) => (
                   <TableRow key={movement.id}>
-                    <TableCell>
-                      {format(
-                        new Date(movement.createdAt),
-                        "dd/MM/yyyy HH:mm",
-                        {
-                          locale: ptBR,
-                        }
-                      )}
-                    </TableCell>
                     <TableCell>{getProductName(movement.productId)}</TableCell>
                     <TableCell>
                       <Badge
@@ -336,12 +323,18 @@ export function Movements() {
                     <TableCell>
                       {formatQuantity(movement.quantity, movement.type)}
                     </TableCell>
-                    <TableCell>{formatCurrency(movement.unitCost)}</TableCell>
                     <TableCell>
                       {formatCurrency(movement.unitSalePrice)}
                     </TableCell>
-                    <TableCell>{movement.userId}</TableCell>
-                    <TableCell>{movement.description || "-"}</TableCell>
+                    <TableCell>
+                      {format(
+                        new Date(movement.createdAt),
+                        "dd/MM/yyyy HH:mm",
+                        {
+                          locale: ptBR,
+                        }
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
