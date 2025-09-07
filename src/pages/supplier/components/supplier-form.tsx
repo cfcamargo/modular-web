@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,85 +29,114 @@ import {
   formatCPF,
 } from "@/lib/documentUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { supplierApi } from "@/api";
+import { toast } from "sonner";
 
-const supplierSchema = z
-  .object({
-    documentType: z.enum(["cnpj", "cpf"], {
-      required_error: "Selecione o tipo de documento",
-    }),
-    document: z.string().min(1, "Documento é obrigatório"),
-    fantasyName: z
-      .string()
-      .min(2, "Nome fantasia deve ter pelo menos 2 caracteres"),
-    socialName: z
-      .string()
-      .min(2, "Razão social deve ter pelo menos 2 caracteres"),
-  })
-  .refine(
-    (data) => {
-      if (data.documentType === "cnpj") {
-        return validateCNPJ(data.document);
-      } else {
-        return validateCPF(data.document);
-      }
-    },
-    {
-      message: "Documento inválido",
-      path: ["document"],
+// ------- Zod Schema (condicional) -------
+const baseSchema = z.object({
+  type: z.enum(["cnpj", "cpf"], {
+    required_error: "Selecione o tipo de documento",
+  }),
+  document: z.string().min(1, "Documento é obrigatório"),
+  fantasyName: z.string().optional(),
+  name: z.string(),
+});
+
+const supplierSchema = baseSchema.superRefine((data, ctx) => {
+  // valida documento conforme tipo
+  if (data.type === "cnpj") {
+    if (!validateCNPJ(data.document)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["document"],
+        message: "CNPJ inválido",
+      });
     }
-  );
+    // PJ: razão social obrigatória
+    if (!data.name || data.name.trim().length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["socialName"],
+        message: "Razão social deve ter pelo menos 2 caracteres",
+      });
+    }
+    // PJ: nome fantasia obrigatório
+    if (!data.fantasyName || data.fantasyName.trim().length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["fantasyName"],
+        message: "Nome fantasia deve ter pelo menos 2 caracteres",
+      });
+    }
+  } else {
+    // CPF
+    if (!validateCPF(data.document)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["document"],
+        message: "CPF inválido",
+      });
+    }
+    // PF: apenas socialName (Nome completo) obrigatório
+    if (!data.name || data.name.trim().length < 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["socialName"],
+        message: "Nome completo deve ter pelo menos 2 caracteres",
+      });
+    }
+    // PF: se enviar fantasia, ignoramos a obrigatoriedade (fica opcional)
+  }
+});
 
 type SupplierFormData = z.infer<typeof supplierSchema>;
 
 export function SupplierForm() {
   const { id } = useParams<{ id: string }>();
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const isEditing = Boolean(id);
 
   const form = useForm<SupplierFormData>({
     resolver: zodResolver(supplierSchema),
     defaultValues: {
-      documentType: "cnpj",
+      type: "cnpj",
       document: "",
       fantasyName: "",
-      socialName: "",
+      name: "",
     },
   });
 
-  const documentType = form.watch("documentType");
+  const type = form.watch("type");
 
+  // Formata documento ao digitar
   const handleDocumentChange = (value: string) => {
-    let formatted = value.replace(/\D/g, "");
-
-    if (documentType === "cnpj") {
-      formatted = formatCNPJ(formatted);
-    } else {
-      formatted = formatCPF(formatted);
-    }
-
-    form.setValue("document", formatted);
+    let digits = value.replace(/\D/g, "");
+    const formatted = type === "cnpj" ? formatCNPJ(digits) : formatCPF(digits);
+    form.setValue("document", formatted, { shouldValidate: true });
   };
+
+  useEffect(() => {
+    form.clearErrors();
+    if (type === "cpf") {
+      form.setValue("fantasyName", "", { shouldValidate: false });
+    }
+  }, [type]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const navigate = useNavigate()
 
   const onSubmit = async (data: SupplierFormData) => {
     setIsSubmitting(true);
-
     try {
-      // Aqui você faria a chamada para sua API
-      console.log("Dados do fornecedor:", data);
-
-      // Simular delay da API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Reset do formulário após sucesso
-      form.reset();
-
-      // Aqui você poderia mostrar uma notificação de sucesso
-      alert("Fornecedor cadastrado com sucesso!");
+      supplierApi.save(data)
+      .then(() => {
+        toast.success("Fornecedor cadastrado com sucesso")
+        navigate("/supplier")
+      })
+      
     } catch (error) {
       console.error("Erro ao cadastrar fornecedor:", error);
-      alert("Erro ao cadastrar fornecedor. Tente novamente.");
+      toast.error("Erro ao cadastrar fornecedor. Tente novamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +167,7 @@ export function SupplierForm() {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Informações do Produto
+              Informações do Fornecedor
             </div>
           </CardTitle>
         </CardHeader>
@@ -148,7 +177,7 @@ export function SupplierForm() {
               {/* Tipo de Documento */}
               <FormField
                 control={form.control}
-                name="documentType"
+                name="type"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-medium">
@@ -156,26 +185,20 @@ export function SupplierForm() {
                     </FormLabel>
                     <FormControl>
                       <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
+                        onValueChange={(v) => field.onChange(v)}
+                        value={field.value}
                         className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="cnpj" id="cnpj" />
-                          <Label
-                            htmlFor="cnpj"
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
+                          <Label htmlFor="cnpj" className="flex items-center gap-2 cursor-pointer">
                             <Building2 className="h-4 w-4" />
                             CNPJ (Pessoa Jurídica)
                           </Label>
                         </div>
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="cpf" id="cpf" />
-                          <Label
-                            htmlFor="cpf"
-                            className="flex items-center gap-2 cursor-pointer"
-                          >
+                          <Label htmlFor="cpf" className="flex items-center gap-2 cursor-pointer">
                             <User className="h-4 w-4" />
                             CPF (Pessoa Física)
                           </Label>
@@ -194,7 +217,7 @@ export function SupplierForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-medium">
-                      {documentType === "cnpj" ? "CNPJ" : "CPF"}
+                      {type === "cnpj" ? "CNPJ" : "CPF"}
                     </FormLabel>
                     <FormControl>
                       <div className="relative">
@@ -202,12 +225,12 @@ export function SupplierForm() {
                         <Input
                           {...field}
                           placeholder={
-                            documentType === "cnpj"
+                            type === "cnpj"
                               ? "00.000.000/0000-00"
                               : "000.000.000-00"
                           }
                           className="pl-10"
-                          maxLength={documentType === "cnpj" ? 18 : 14}
+                          maxLength={type === "cnpj" ? 18 : 14}
                           onChange={(e) => handleDocumentChange(e.target.value)}
                         />
                       </div>
@@ -217,53 +240,81 @@ export function SupplierForm() {
                 )}
               />
 
-              {/* Nome Fantasia */}
-              <FormField
-                control={form.control}
-                name="fantasyName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Nome Fantasia
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Building2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          {...field}
-                          placeholder="Nome comercial do fornecedor"
-                          className="pl-10"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Campos variáveis conforme o tipo */}
+              {type === "cnpj" ? (
+                // PESSOA JURÍDICA
+                <>
+                  {/* Razão Social (obrigatório em PJ) */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-medium">Razão Social *</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                              {...field}
+                              placeholder="Razão social oficial do fornecedor"
+                              className="pl-10"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Razão Social */}
-              <FormField
-                control={form.control}
-                name="socialName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-base font-medium">
-                      Razão Social
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <FileText className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                        <Input
-                          {...field}
-                          placeholder="Razão social oficial do fornecedor"
-                          className="pl-10"
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  {/* Nome Fantasia (obrigatório em PJ) */}
+                  <FormField
+                    control={form.control}
+                    name="fantasyName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-medium">Nome Fantasia *</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Building2 className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                              {...field}
+                              placeholder="Nome comercial do fornecedor"
+                              className="pl-10"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : (
+                // PESSOA FÍSICA
+                <>
+                  {/* Nome completo (obrigatório em PF) */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-base font-medium">Nome completo *</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                            <Input
+                              {...field}
+                              placeholder="Nome completo do fornecedor"
+                              className="pl-10"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  {/* Nome fantasia oculto/ocional em PF (mantemos no form state, mas não exibimos) */}
+                </>
+              )}
 
               {/* Botões */}
               <div className="flex gap-4 pt-4 justify-end">

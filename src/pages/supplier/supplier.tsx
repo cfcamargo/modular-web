@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import TableFilter from "@/components/shared/table-filter";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -12,45 +11,20 @@ import {
 import { Link } from "react-router-dom";
 import {
   SupplierTableRow,
-  SupplierResponse,
 } from "./components/supplier-table-row";
+import { PaginationEnum } from "@/utils/enums/PaginationEnum";
+import { GridRequest } from "@/models/requests/grid-request";
+import { supplierApi } from "@/api";
+import { MetaProps } from "@/models/responses/meta-response";
+import { toast } from "sonner";
+import { SupplierResponse } from "@/models/responses/supplier-response";
 
-// Dados mock para fornecedores
-const mockSuppliers: SupplierResponse[] = [
-  {
-    id: "1",
-    document: "12.345.678/0001-90",
-    name: "Fornecedor ABC Ltda",
-    status: "active",
-  },
-  {
-    id: "2",
-    document: "98.765.432/0001-10",
-    name: "Distribuidora XYZ S.A.",
-    status: "active",
-  },
-  {
-    id: "3",
-    document: "123.456.789-00",
-    name: "João Silva - MEI",
-    status: "inactive",
-  },
-  {
-    id: "4",
-    document: "11.222.333/0001-44",
-    name: "Empresa Beta Comércio",
-    status: "active",
-  },
-  {
-    id: "5",
-    document: "987.654.321-11",
-    name: "Maria Santos - Autônoma",
-    status: "active",
-  },
-];
+
 
 export default function Supplier() {
-  const [suppliers] = useState<SupplierResponse[]>(mockSuppliers);
+  const [suppliers, setSuppliers] = useState<SupplierResponse[]>();
+  const [meta, setMeta] = useState<MetaProps | null>(null);
+  const [loading, setLoading ] = useState(false)
 
   const handleViewDetails = (supplier: SupplierResponse) => {
     console.log("Ver detalhes do fornecedor:", supplier);
@@ -59,6 +33,38 @@ export default function Supplier() {
   const handleDelete = (supplier: SupplierResponse) => {
     console.log("Excluir fornecedor:", supplier);
   };
+
+  const getSuppliers = async (page: number = 1, filter?: string) => {
+    const productPaylod: GridRequest = {
+      page,
+      perPage: PaginationEnum.PER_PAGE20,
+      searchTerm: filter ?? "",
+    };
+
+    setLoading(true);
+    supplierApi
+      .get(productPaylod)
+      .then((response) => {
+        let meta: MetaProps = {
+          lastPage: response.data.lastPage,
+          page: Number(response.data.page),
+          perPage: Number(response.data.perPage),
+          total: response.data.total,
+        };
+        setSuppliers(response.data.data);
+        setMeta(meta);
+      })
+      .catch(() => {
+        toast.error("Erro ao buscar fornecedores");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    getSuppliers()
+  },[])
 
   return (
     <div className="flex flex-col gap-4">
@@ -75,7 +81,7 @@ export default function Supplier() {
 
       <div className="space-y-2.5">
         <TableFilter
-          disabled={suppliers.length === 0}
+          disabled={suppliers?.length === 0}
           description="Nome do fornecedor"
           onClearFilter={() => {}}
           onSubmitFilter={() => {}}
@@ -92,7 +98,7 @@ export default function Supplier() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {suppliers.map((supplier) => {
+              {suppliers?.map((supplier) => {
                 return (
                   <SupplierTableRow
                     supplier={supplier}
@@ -105,7 +111,7 @@ export default function Supplier() {
             </TableBody>
           </Table>
         </div>
-        {suppliers.length === 0 && (
+        {suppliers?.length === 0 && (
           <div className="w-full py-8 flex justify-center">
             <span className="text-zinc-600">Sem fornecedores cadastrados</span>
           </div>

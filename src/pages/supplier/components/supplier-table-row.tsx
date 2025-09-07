@@ -1,13 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { SupplierResponse } from "@/models/responses/supplier-response";
 import { Eye, Trash2 } from "lucide-react";
 
-export interface SupplierResponse {
-  id: string;
-  document: string; // CPF/CNPJ
-  name: string; // Nome/Razão Social
-  status: "active" | "inactive";
-}
 
 interface SupplierTableRowProps {
   supplier: SupplierResponse;
@@ -27,12 +22,12 @@ export function SupplierTableRow({
       <TableCell>
         <span
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            supplier.status === "active"
+            supplier.status === 1
               ? "bg-green-100 text-green-800"
               : "bg-red-100 text-red-800"
           }`}
         >
-          {supplier.status === "active" ? "Ativo" : "Inativo"}
+          {supplier.status === 1? "Ativo" : "Inativo"}
         </span>
       </TableCell>
       <TableCell className="text-right">
