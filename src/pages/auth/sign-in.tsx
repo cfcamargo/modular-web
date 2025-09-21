@@ -21,7 +21,6 @@ type SignInForm = z.infer<typeof signInForm>;
 const { login } = authApi;
 
 export function SignIn() {
-
   const {
     register,
     handleSubmit,
@@ -29,8 +28,8 @@ export function SignIn() {
   } = useForm<SignInForm>({
     defaultValues: {
       // email: searchParams.get("email") ?? "",
-      email: "admin@admin.com",
-      password: "password",
+      email: "",
+      password: "",
     },
   });
 
