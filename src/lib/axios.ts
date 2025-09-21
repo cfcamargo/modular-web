@@ -5,9 +5,6 @@ import { toast } from "sonner";
 const api = axios.create({
   baseURL: env.VITE_API_URL,
   withCredentials: true,
-  headers: {
-    "Access-Control-Allow-Origin": "*",
-  },
 });
 
 api.interceptors.response.use(
