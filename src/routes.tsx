@@ -24,6 +24,8 @@ import Supplier from "./pages/supplier/supplier";
 import NewSupplier from "./pages/supplier/new-supplier";
 import SupplierDetails from "./pages/supplier/supplier-details";
 import NewMovement from "./pages/movements/new-movement";
+import QuoteList from "./pages/quote/quotes";
+import NewQuote from "./pages/quote/new-quote";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -71,6 +73,8 @@ export const router = createBrowserRouter([
       { path: "/supplier", element: <Supplier /> },
       { path: "/supplier/create", element: <NewSupplier /> },
       { path: "/supplier/:id", element: <SupplierDetails /> },
+      { path: "/quotes", element: <QuoteList /> },
+      { path: "/quotes/create", element: <NewQuote /> },
     ],
   },
   {

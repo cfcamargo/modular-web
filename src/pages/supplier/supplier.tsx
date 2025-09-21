@@ -9,22 +9,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Link } from "react-router-dom";
-import {
-  SupplierTableRow,
-} from "./components/supplier-table-row";
+import { SupplierTableRow } from "./components/supplier-table-row";
 import { PaginationEnum } from "@/utils/enums/PaginationEnum";
 import { GridRequest } from "@/models/requests/grid-request";
 import { supplierApi } from "@/api";
 import { MetaProps } from "@/models/responses/meta-response";
 import { toast } from "sonner";
 import { SupplierResponse } from "@/models/responses/supplier-response";
-
-
+import Pagination from "@/components/shared/pagination";
 
 export default function Supplier() {
   const [suppliers, setSuppliers] = useState<SupplierResponse[]>();
   const [meta, setMeta] = useState<MetaProps | null>(null);
-  const [loading, setLoading ] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const handleViewDetails = (supplier: SupplierResponse) => {
     console.log("Ver detalhes do fornecedor:", supplier);
@@ -63,8 +60,8 @@ export default function Supplier() {
   };
 
   useEffect(() => {
-    getSuppliers()
-  },[])
+    getSuppliers();
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,45 +75,57 @@ export default function Supplier() {
           </Button>
         </div>
       </div>
+      {!loading && (
+        <div className="space-y-2.5">
+          <TableFilter
+            disabled={suppliers?.length === 0}
+            description="Nome do fornecedor"
+            onClearFilter={() => {}}
+            onSubmitFilter={() => {}}
+          />
 
-      <div className="space-y-2.5">
-        <TableFilter
-          disabled={suppliers?.length === 0}
-          description="Nome do fornecedor"
-          onClearFilter={() => {}}
-          onSubmitFilter={() => {}}
-        />
-
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome/Razão Social</TableHead>
-                <TableHead>CPF/CNPJ</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[300px]">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {suppliers?.map((supplier) => {
-                return (
-                  <SupplierTableRow
-                    supplier={supplier}
-                    key={supplier.id}
-                    onViewDetails={() => handleViewDetails(supplier)}
-                    onDelete={() => handleDelete(supplier)}
-                  />
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-        {suppliers?.length === 0 && (
-          <div className="w-full py-8 flex justify-center">
-            <span className="text-zinc-600">Sem fornecedores cadastrados</span>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome/Razão Social</TableHead>
+                  <TableHead>CPF/CNPJ</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[300px]">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {suppliers?.map((supplier) => {
+                  return (
+                    <SupplierTableRow
+                      supplier={supplier}
+                      key={supplier.id}
+                      onViewDetails={() => handleViewDetails(supplier)}
+                      onDelete={() => handleDelete(supplier)}
+                    />
+                  );
+                })}
+              </TableBody>
+            </Table>
           </div>
-        )}
-      </div>
+          {meta && suppliers && suppliers.length > 0 && (
+            <Pagination
+              pageIndex={meta.page}
+              totalCount={meta.total}
+              perPage={meta.perPage}
+              meta={meta}
+              getData={getSuppliers}
+            />
+          )}
+          {suppliers?.length === 0 && (
+            <div className="w-full py-8 flex justify-center">
+              <span className="text-zinc-600">
+                Sem fornecedores cadastrados
+              </span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

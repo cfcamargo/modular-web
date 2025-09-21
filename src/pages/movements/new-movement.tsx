@@ -1,10 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -21,11 +33,6 @@ import { useUserLoggedStore } from "@/store/auth/user-logged";
 import { useNavigate } from "react-router-dom";
 import { SupplierResponse } from "@/models/responses/supplier-response";
 
-interface Supplier {
-  id: string;
-  name: string;
-}
-
 interface StockMovementFormData {
   productId: string;
   type: StockMovementType;
@@ -36,32 +43,48 @@ interface StockMovementFormData {
   description?: string;
 }
 
-const mockSuppliers: Supplier[] = [
-  { id: "1", name: "Fornecedor Tech Ltda" },
-  { id: "2", name: "Distribuidora Digital" },
-  { id: "3", name: "Importadora Global" },
-];
-
 const movementTypeConfig = {
-  PURCHASE: { label: "Compra", color: "bg-green-100 text-green-800", isEntry: true },
+  PURCHASE: {
+    label: "Compra",
+    color: "bg-green-100 text-green-800",
+    isEntry: true,
+  },
   SALE: { label: "Venda", color: "bg-red-100 text-red-800", isEntry: false },
-  ADJUST_IN: { label: "Ajuste Entrada", color: "bg-blue-100 text-blue-800", isEntry: true },
-  ADJUST_OUT: { label: "Ajuste Saída", color: "bg-orange-100 text-orange-800", isEntry: false },
-  RETURN_TO_SUPPLIER: { label: "Devolução p/ Fornecedor", color: "bg-purple-100 text-purple-800", isEntry: false },
-  RETURN_FROM_CLIENT: { label: "Devolução de Cliente", color: "bg-teal-100 text-teal-800", isEntry: true },
+  ADJUST_IN: {
+    label: "Ajuste Entrada",
+    color: "bg-blue-100 text-blue-800",
+    isEntry: true,
+  },
+  ADJUST_OUT: {
+    label: "Ajuste Saída",
+    color: "bg-orange-100 text-orange-800",
+    isEntry: false,
+  },
+  RETURN_TO_SUPPLIER: {
+    label: "Devolução p/ Fornecedor",
+    color: "bg-purple-100 text-purple-800",
+    isEntry: false,
+  },
+  RETURN_FROM_CLIENT: {
+    label: "Devolução de Cliente",
+    color: "bg-teal-100 text-teal-800",
+    isEntry: true,
+  },
 } as const;
 
 export default function NewMovement() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<ProductResponse | null>(null);
+  const [selectedProduct, setSelectedProduct] =
+    useState<ProductResponse | null>(null);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [productSearch, setProductSearch] = useState("");
-  const [supplierSearch, setSupplierSearch ] = useState("")
-  const [selectedSupplier, setSelectedSupplier ] = useState<SupplierResponse | null>(null)
-  const [suppliers, setSuppliers] = useState<SupplierResponse[]>([])
+  const [supplierSearch, setSupplierSearch] = useState("");
+  const [selectedSupplier, setSelectedSupplier] =
+    useState<SupplierResponse | null>(null);
+  const [suppliers, setSuppliers] = useState<SupplierResponse[]>([]);
 
   const { user } = useUserLoggedStore();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const {
     register,
@@ -74,8 +97,14 @@ export default function NewMovement() {
 
   const HiddenRegistrations = () => (
     <>
-      <input type="hidden" {...register("productId", { required: "Produto é obrigatório" })} />
-      <input type="hidden" {...register("type", { required: "Tipo é obrigatório" })} />
+      <input
+        type="hidden"
+        {...register("productId", { required: "Produto é obrigatório" })}
+      />
+      <input
+        type="hidden"
+        {...register("type", { required: "Tipo é obrigatório" })}
+      />
     </>
   );
 
@@ -94,10 +123,10 @@ export default function NewMovement() {
 
   const handleSupplierSelect = (supplier: SupplierResponse | null) => {
     if (supplier) {
-      setSelectedSupplier(supplier)
+      setSelectedSupplier(supplier);
       setValue("supplierId", supplier.id, { shouldValidate: true });
     } else {
-      setSelectedSupplier(null)
+      setSelectedSupplier(null);
       setValue("supplierId", "", { shouldValidate: true });
     }
   };
@@ -121,25 +150,29 @@ export default function NewMovement() {
   }, [productSearch]);
 
   // helpers / regras
-  const ENTRY_TYPES = ["PURCHASE", "ADJUST_IN", "RETURN_FROM_CLIENT"] as const;
   const EXIT_TYPES = ["SALE", "ADJUST_OUT", "RETURN_TO_SUPPLIER"] as const;
 
-  const isEntryMovement = useMemo(
-    () => (watchedType ? (movementTypeConfig as any)[watchedType]?.isEntry : false),
-    [watchedType]
-  );
-
-  const requiresSupplier = watchedType === "PURCHASE" || watchedType === "RETURN_TO_SUPPLIER";
-  const requiresCost = watchedType === "PURCHASE" || watchedType === "ADJUST_IN" || watchedType === "RETURN_FROM_CLIENT";
-  const requiresSalePrice = watchedType === "PURCHASE" || watchedType === "SALE";
-  const showSalePriceOptional = watchedType === "ADJUST_IN" || watchedType === "RETURN_FROM_CLIENT";
+  const requiresSupplier =
+    watchedType === "PURCHASE" || watchedType === "RETURN_TO_SUPPLIER";
+  const requiresCost =
+    watchedType === "PURCHASE" ||
+    watchedType === "ADJUST_IN" ||
+    watchedType === "RETURN_FROM_CLIENT";
+  const requiresSalePrice =
+    watchedType === "PURCHASE" || watchedType === "SALE";
+  const showSalePriceOptional =
+    watchedType === "ADJUST_IN" || watchedType === "RETURN_FROM_CLIENT";
 
   const isExit = EXIT_TYPES.includes(watchedType as any);
   const hasInsufficientStock =
-    isExit && selectedProduct && Number(watchedQuantity) > Number(selectedProduct.stockOnHand ?? 0);
+    isExit &&
+    selectedProduct &&
+    Number(watchedQuantity) > Number(selectedProduct.stockOnHand ?? 0);
 
   // unidades que aceitam decimais
-  const isDecimalUnit = ["KG", "LT", "L", "M2", "M³", "M3"].includes((selectedProduct?.unit as any) ?? "");
+  const isDecimalUnit = ["KG", "LT", "L", "M2", "M³", "M3"].includes(
+    (selectedProduct?.unit as any) ?? ""
+  );
   const quantityStep = isDecimalUnit ? "0.01" : "1";
   const quantityMin = isDecimalUnit ? "0.01" : "1";
 
@@ -153,8 +186,13 @@ export default function NewMovement() {
 
   // Devolução do cliente usa custo médio atual (preenchido e bloqueado)
   useEffect(() => {
-    if (watchedType === "RETURN_FROM_CLIENT" && selectedProduct?.avgUnitCost != null) {
-      setValue("unitCost", Number(selectedProduct.avgUnitCost), { shouldValidate: true });
+    if (
+      watchedType === "RETURN_FROM_CLIENT" &&
+      selectedProduct?.avgUnitCost != null
+    ) {
+      setValue("unitCost", Number(selectedProduct.avgUnitCost), {
+        shouldValidate: true,
+      });
     }
   }, [watchedType, selectedProduct?.avgUnitCost, setValue]);
 
@@ -189,7 +227,7 @@ export default function NewMovement() {
       toast.success("Movimentação registrada.");
       reset();
       setSelectedProduct(null);
-      navigate("/movements")
+      navigate("/movements");
     } catch {
       toast.error("Tente novamente em alguns instantes.");
     } finally {
@@ -197,8 +235,8 @@ export default function NewMovement() {
     }
   };
 
-  const getSuppliers = async() => {
-     try {
+  const getSuppliers = async () => {
+    try {
       const response = await supplierApi.get({
         page: 1,
         perPage: 30,
@@ -209,10 +247,10 @@ export default function NewMovement() {
       setSuppliers([]);
       toast.error("Erro ao carregar fornecedores");
     }
-  }
+  };
 
   useEffect(() => {
-    getSuppliers();    
+    getSuppliers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supplierSearch]);
 
@@ -223,7 +261,9 @@ export default function NewMovement() {
           <Package className="h-5 w-5" />
           Nova Movimentação de Estoque
         </CardTitle>
-        <CardDescription>Registre entradas e saídas de produtos no estoque</CardDescription>
+        <CardDescription>
+          Registre entradas e saídas de produtos no estoque
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <HiddenRegistrations />
@@ -247,14 +287,22 @@ export default function NewMovement() {
                 allOptionLabel="Todos os produtos"
                 clearOnSelect={true}
               />
-              {errors.productId && <p className="text-sm text-destructive">{errors.productId.message}</p>}
+              {errors.productId && (
+                <p className="text-sm text-destructive">
+                  {errors.productId.message}
+                </p>
+              )}
             </div>
 
             {/* Tipo */}
             <div className="space-y-2">
               <Label htmlFor="type">Tipo de Movimentação *</Label>
               <Select
-                onValueChange={(value) => setValue("type", value as StockMovementType, { shouldValidate: true })}
+                onValueChange={(value) =>
+                  setValue("type", value as StockMovementType, {
+                    shouldValidate: true,
+                  })
+                }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione o tipo" />
@@ -269,7 +317,11 @@ export default function NewMovement() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.type && <p className="text-sm text-destructive">{errors.type.message}</p>}
+              {errors.type && (
+                <p className="text-sm text-destructive">
+                  {errors.type.message}
+                </p>
+              )}
             </div>
           </div>
 
@@ -280,18 +332,23 @@ export default function NewMovement() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="font-medium">Produto:</span>
-                    <p className="text-muted-foreground">{selectedProduct.name}</p>
+                    <p className="text-muted-foreground">
+                      {selectedProduct.name}
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium">Estoque Atual:</span>
                     <p className="text-muted-foreground">
-                      {selectedProduct.stockOnHand ?? 0} {selectedProduct.unit?.toLowerCase?.() ? "" : "unidades"}
+                      {selectedProduct.stockOnHand ?? 0}{" "}
+                      {selectedProduct.unit?.toLowerCase?.() ? "" : "unidades"}
                     </p>
                   </div>
                   <div>
                     <span className="font-medium">Custo Médio:</span>
                     <p className="text-muted-foreground">
-                      {selectedProduct.avgUnitCost != null ? `R$ ${Number(selectedProduct.avgUnitCost).toFixed(2)}` : "—"}
+                      {selectedProduct.avgUnitCost != null
+                        ? `R$ ${Number(selectedProduct.avgUnitCost).toFixed(2)}`
+                        : "—"}
                     </p>
                   </div>
                 </div>
@@ -304,7 +361,8 @@ export default function NewMovement() {
             {/* Quantidade */}
             <div className="space-y-2">
               <Label htmlFor="quantity">
-                Quantidade {selectedProduct ? `(${selectedProduct.unit})` : ""} *
+                Quantidade {selectedProduct ? `(${selectedProduct.unit})` : ""}{" "}
+                *
               </Label>
               <Input
                 id="quantity"
@@ -314,15 +372,24 @@ export default function NewMovement() {
                 placeholder="Digite a quantidade"
                 {...register("quantity", {
                   required: "Quantidade é obrigatória",
-                  min: { value: Number(quantityMin), message: `Quantidade deve ser ≥ ${quantityMin}` },
+                  min: {
+                    value: Number(quantityMin),
+                    message: `Quantidade deve ser ≥ ${quantityMin}`,
+                  },
                 })}
               />
-              {errors.quantity && <p className="text-sm text-destructive">{errors.quantity.message}</p>}
+              {errors.quantity && (
+                <p className="text-sm text-destructive">
+                  {errors.quantity.message}
+                </p>
+              )}
               {hasInsufficientStock && (
                 <Alert className="border-orange-200 bg-orange-50">
                   <AlertTriangle className="h-4 w-4 text-orange-600" />
                   <AlertDescription className="text-orange-800">
-                    Estoque insuficiente! Disponível: {selectedProduct?.stockOnHand} {selectedProduct?.unit ?? "un"}
+                    Estoque insuficiente! Disponível:{" "}
+                    {selectedProduct?.stockOnHand}{" "}
+                    {selectedProduct?.unit ?? "un"}
                   </AlertDescription>
                 </Alert>
               )}
@@ -333,7 +400,10 @@ export default function NewMovement() {
               {requiresCost ? (
                 <>
                   <Label htmlFor="unitCost">
-                    Custo Unitário {watchedType === "RETURN_FROM_CLIENT" ? "(custo médio atual)" : "*"}
+                    Custo Unitário{" "}
+                    {watchedType === "RETURN_FROM_CLIENT"
+                      ? "(custo médio atual)"
+                      : "*"}
                   </Label>
                   <Input
                     id="unitCost"
@@ -349,10 +419,15 @@ export default function NewMovement() {
                           : "Custo unitário é obrigatório para este tipo",
                     })}
                   />
-                  {errors.unitCost && <p className="text-sm text-destructive">{errors.unitCost.message}</p>}
+                  {errors.unitCost && (
+                    <p className="text-sm text-destructive">
+                      {errors.unitCost.message}
+                    </p>
+                  )}
                   {watchedType === "RETURN_FROM_CLIENT" && (
                     <p className="text-xs text-muted-foreground">
-                      Usando o custo médio atual do produto para recompor o estoque.
+                      Usando o custo médio atual do produto para recompor o
+                      estoque.
                     </p>
                   )}
                 </>
@@ -385,11 +460,14 @@ export default function NewMovement() {
                     })}
                   />
                   {errors.unitSalePrice && (
-                    <p className="text-sm text-destructive">{errors.unitSalePrice.message}</p>
+                    <p className="text-sm text-destructive">
+                      {errors.unitSalePrice.message}
+                    </p>
                   )}
                   {!requiresSalePrice && (
                     <p className="text-xs text-muted-foreground">
-                      Opcional. Se não informado, podemos usar o preço sugerido baseado na margem.
+                      Opcional. Se não informado, podemos usar o preço sugerido
+                      baseado na margem.
                     </p>
                   )}
                 </>
@@ -416,7 +494,11 @@ export default function NewMovement() {
                 allOptionLabel="Todos os fornecedores"
                 clearOnSelect={true}
               />
-              {errors.productId && <p className="text-sm text-destructive">{errors.supplierId?.message}</p>}
+              {errors.productId && (
+                <p className="text-sm text-destructive">
+                  {errors.supplierId?.message}
+                </p>
+              )}
             </div>
           )}
 
@@ -433,7 +515,11 @@ export default function NewMovement() {
 
           {/* Ações */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button type="submit" disabled={isLoading || !!hasInsufficientStock} className="flex-1">
+            <Button
+              type="submit"
+              disabled={isLoading || !!hasInsufficientStock}
+              className="flex-1"
+            >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Salvar Movimentação
             </Button>
