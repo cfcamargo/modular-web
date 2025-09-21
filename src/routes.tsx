@@ -34,7 +34,7 @@ const checkAuth = async () => {
     useUserLoggedStore.getState().setUser(data.user); // usuário autenticado — passa
   } catch {
     toast.error("Sessão expirada, Faça Login novamente");
-    return redirect("/sign-in");
+    // return redirect("/sign-in");
   } finally {
     useUserLoggedStore.getState().setLoadingUserLoggedData(false);
   }
