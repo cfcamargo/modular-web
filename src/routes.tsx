@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, redirect } from "react-router-dom";
 import { AppLayout } from "./pages/_layouts/app-layout";
 import Dashboard from "./pages/dashboard/dashboard";
 import { AuthLayout } from "./pages/_layouts/auth";
@@ -34,7 +34,7 @@ const checkAuth = async () => {
     useUserLoggedStore.getState().setUser(data.user); // usuário autenticado — passa
   } catch {
     toast.error("Sessão expirada, Faça Login novamente");
-    // return redirect("/sign-in");
+    return redirect("/sign-in");
   } finally {
     useUserLoggedStore.getState().setLoadingUserLoggedData(false);
   }
