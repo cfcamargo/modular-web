@@ -12,7 +12,7 @@ export interface Product {
 }
 
 export interface QuoteItem {
-  id: string;
+  id?: string;
   product: Product | null;
   quantity: number | string;
   unitPrice: number | string;

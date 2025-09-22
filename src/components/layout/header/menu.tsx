@@ -19,20 +19,7 @@ const menuItems: MenuItem[] = [
   //   path: "/clients",
   //   name: "Clientes",
   // },
-  {
-    path: "",
-    name: "Vendas",
-    subItems: [
-      {
-        name: "Orçamentos",
-        path: "/quotes",
-      },
-      // {
-      //   name: "Pedidos",
-      //   path: "/orders",
-      // },
-    ],
-  },
+
   {
     name: "Estoque",
     path: "",
@@ -50,6 +37,10 @@ const menuItems: MenuItem[] = [
         name: "Fornecedores",
       },
     ],
+  },
+  {
+    path: "/quotes",
+    name: "Pedidos",
   },
   {
     path: "/users",

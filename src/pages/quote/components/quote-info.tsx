@@ -17,12 +17,19 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { CalendarIcon, Check, ChevronsUpDown, User } from "lucide-react";
+import {
+  CalendarIcon,
+  Check,
+  ChevronDownIcon,
+  ChevronsUpDown,
+  User,
+} from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { Customer, Quote } from "@/models/common/quotes";
 import { mockCustomers } from "../mock-data";
+import { DateField, DateInput } from "@/components/ui/datefield-rac";
 
 interface QuoteInfoProps {
   quote: Quote;
@@ -54,90 +61,17 @@ export const QuoteInfo = ({ quote, onUpdate }: QuoteInfoProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="customer">Cliente</Label>
-            <Popover open={customerOpen} onOpenChange={setCustomerOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={customerOpen}
-                  className="w-full justify-between"
-                >
-                  {quote.customer
-                    ? quote.customer.name
-                    : "Selecione um cliente..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-full p-0">
-                <Command>
-                  <CommandInput placeholder="Buscar cliente..." />
-                  <CommandList>
-                    <CommandEmpty>Nenhum cliente encontrado.</CommandEmpty>
-                    <CommandGroup>
-                      {mockCustomers.map((customer) => (
-                        <CommandItem
-                          key={customer.id}
-                          value={customer.name}
-                          onSelect={() => handleCustomerSelect(customer)}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              quote.customer?.id === customer.id
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <div>
-                            <div className="font-medium">{customer.name}</div>
-                            {customer.email && (
-                              <div className="text-sm text-muted-foreground">
-                                {customer.email}
-                              </div>
-                            )}
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="customer">Cliente</Label>
+        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="validUntil">Validade</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !quote.validUntil && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {quote.validUntil ? (
-                    format(quote.validUntil, "PPP", { locale: ptBR })
-                  ) : (
-                    <span>Selecione uma data</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={quote.validUntil || undefined}
-                  onSelect={handleDateSelect}
-                  initialFocus
-                  className={cn("p-3 pointer-events-auto")}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
+        <div className="w-ful flex flex-col gap-3">
+          <DateField className="*:not-first:mt-2">
+            <Label className="text-foreground text-sm font-medium">
+              Validade
+            </Label>
+            <DateInput className="bg-transparent" />
+          </DateField>
         </div>
 
         <div className="space-y-2">

@@ -21,15 +21,53 @@ export default function NewQuote() {
     extraDiscount: "",
   });
 
+  // const addItem = (item: QuoteItem) => {
+  //   const newItem: QuoteItem = {
+  //     ...item,
+  //     id: new Date().getTime().toString(),
+  //   };
+  //   setQuote((prev) => ({
+  //     ...prev,
+  //     items: [...prev.items, newItem],
+  //   }));
+  // };
+
+  const toNum = (v: number | string | undefined | null) => Number(v ?? 0) || 0;
+
   const addItem = (item: QuoteItem) => {
-    const newItem: QuoteItem = {
-      ...item,
-      id: new Date().getTime().toString(),
-    };
-    setQuote((prev) => ({
-      ...prev,
-      items: [...prev.items, newItem],
-    }));
+    if (!item?.product?.id) return;
+
+    setQuote((prev) => {
+      const items = prev.items ?? [];
+      const idx = items.findIndex((it) => it.product?.id === item.product!.id);
+
+      if (idx === -1) {
+        // novo item
+        const newItem: QuoteItem = {
+          ...item,
+          id: String(Date.now()),
+          quantity: toNum(item.quantity),
+          unitPrice: toNum(item.unitPrice),
+          discount: toNum(item.discount ?? 0),
+        };
+        return { ...prev, items: [...items, newItem] };
+      }
+
+      // já existe → mescla: soma quantidade e atualiza os outros campos
+      const existing = items[idx];
+      const merged: QuoteItem = {
+        ...existing,
+        ...item, // atualiza campos do novo
+        id: existing.id, // mantém o id original da linha
+        quantity: toNum(existing.quantity) + toNum(item.quantity),
+        unitPrice: toNum(item.unitPrice),
+        discount: toNum(item.discount ?? existing.discount ?? 0),
+      };
+
+      const next = [...items];
+      next[idx] = merged;
+      return { ...prev, items: next };
+    });
   };
 
   const removeItem = (itemId: string) => {
@@ -122,20 +160,20 @@ export default function NewQuote() {
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
-                onClick={handleSave}
-                className="flex items-center gap-2"
-              >
-                <Save className="h-4 w-4" />
-                Salvar
-              </Button>
-
-              <Button
-                variant="outline"
                 onClick={handlePrint}
                 className="flex items-center gap-2"
               >
                 <Printer className="h-4 w-4" />
                 Imprimir
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleSave}
+                className="flex items-center gap-2"
+              >
+                <Save className="h-4 w-4" />
+                Salvar
               </Button>
 
               <Button
@@ -151,7 +189,7 @@ export default function NewQuote() {
         </Card>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="">
             <QuoteInfo quote={quote} onUpdate={setQuote} />
 
             <QuoteItems
