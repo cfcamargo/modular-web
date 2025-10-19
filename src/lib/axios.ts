@@ -4,14 +4,18 @@ import { toast } from "sonner";
 
 const api = axios.create({
   baseURL: env.VITE_API_URL,
-  withCredentials: true,
+  withCredentials: true, // cookies HttpOnly vão junto
 });
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      toast.error("Login expirado, faça login novamente");
+      if (error.config?.url?.includes("/auth/login")) {
+        return Promise.reject(error);
+      }
+
+      toast.error("Sua sessão expirou. Faça login novamente.");
       window.location.href = "/sign-in";
     }
 

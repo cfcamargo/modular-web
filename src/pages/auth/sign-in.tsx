@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useForm } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { authApi } from "@/api";
@@ -18,8 +17,6 @@ const signInForm = z.object({
 
 type SignInForm = z.infer<typeof signInForm>;
 
-const { login } = authApi;
-
 export function SignIn() {
   const {
     register,
@@ -28,29 +25,26 @@ export function SignIn() {
   } = useForm<SignInForm>({
     defaultValues: {
       // email: searchParams.get("email") ?? "",
-      email: "",
+      email: "admin@grupomodularms.com",
       password: "",
     },
   });
 
   const navigate = useNavigate();
 
-  const { mutateAsync: authenticate } = useMutation({
-    mutationFn: login,
-  });
-
   const handleSignin = async (userData: SignInForm) => {
     try {
-      const { data } = await authenticate(userData);
-      toast.success(
-        `Login Bem sucessido, Bem vindo ${data.user.fullName.split(" ")[0]}`
-      );
-
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 1000);
+      await authApi.login(userData).then((resp) => {
+        toast.success(
+          `Login Bem sucessido, Bem vindo ${
+            resp.data.user.fullName.split(" ")[0]
+          }`
+        );
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      });
     } catch (e) {
-      console.log(e);
       toast.error(
         `Erro ao realizar login, verifique suas credenciais e tente novamente`
       );

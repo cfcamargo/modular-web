@@ -1,87 +1,89 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Helmet } from "react-helmet-async";
+import { useState } from "react";
+import LoadingAnimation from "@/components/shared/loading-animation";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { FileText, Plus, BarChart } from "lucide-react";
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function QuoteList() {
-  return (
-    <div className="min-h-screen bg-background p-4 lg:p-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-4">Sistema de Orçamentos</h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            Gerencie seus orçamentos de forma simples e profissional
-          </p>
+  const [loading, setLoading] = useState(false);
+  const [quotes, setQuotes] = useState([]);
 
-          <Link to="/quotes/create">
-            <Button size="lg" className="flex items-center gap-2">
-              <Plus className="h-5 w-5" />
-              Criar Novo Orçamento
+  return (
+    <>
+      <Helmet title="Produtos" />
+      <div className="flex flex-col gap-4">
+        <div className="w-full flex justify-between items-center">
+          <h1 className="text-3xl font-bold tracking-tighter">Orcamentos</h1>
+          <div className="flex gap-2">
+            <Button className="h-8" asChild disabled={loading}>
+              <Link to="/quotes/create">Novo Orcamento</Link>
             </Button>
-          </Link>
+          </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3 mt-12">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                Orçamentos
-              </CardTitle>
-              <CardDescription>
-                Crie e gerencie orçamentos para seus clientes
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link to="/quotes/new">
-                <Button variant="outline" className="w-full">
-                  Novo Orçamento
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        <div className="space-y-2.5">
+          {/* <TableFilter
+            disabled={products.length === 0}
+            description="Nome do produto"
+            onClearFilter={() => {}}
+            onSubmitFilter={() => {}}
+          /> */}
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart className="h-5 w-5" />
-                Relatórios
-              </CardTitle>
-              <CardDescription>
-                Acompanhe o desempenho dos seus orçamentos
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                Em Breve
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Configurações
-              </CardTitle>
-              <CardDescription>
-                Gerencie clientes, produtos e configurações
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" disabled>
-                Em Breve
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-md border">
+            {loading ? (
+              <LoadingAnimation />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Marca</TableHead>
+                    <TableHead className="w-[100px]">Unidade</TableHead>
+                    <TableHead className="w-[100px]">Em estoque</TableHead>
+                    <TableHead className="flex-1 overflow-ellipsis">
+                      Descrição
+                    </TableHead>
+                    <TableHead className="w-[300px]">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {quotes.map((product) => {
+                    return (
+                      // <ProductTableRow
+                      //   product={product}
+                      //   key={product.id}
+                      //   destroyProduct={() => {}}
+                      // />
+                      <p>oi</p>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          {/* {meta && products.length > 0 && (
+            <Pagination
+              pageIndex={meta.page}
+              totalCount={meta.total}
+              perPage={meta.perPage}
+              meta={meta}
+              getData={getProducts}
+            />
+          )}
+          {products.length === 0 && (
+            <div className="w-full py-8 flex justify-center">
+              <span className="text-zinc-600">Sem produtos cadastrados</span>
+            </div>
+          )} */}
         </div>
       </div>
-    </div>
+    </>
   );
 }

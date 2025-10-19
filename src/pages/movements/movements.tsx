@@ -37,9 +37,11 @@ import { ProductResponse } from "@/models/responses/product-response";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { MovementReponse } from "@/models/responses/stock-movement-response";
-import { StockMovementTypeEnum, StockMovementTypeEnumPT } from "@/utils/enums/StockMovementTypeEnum";
+import {
+  StockMovementTypeEnum,
+  StockMovementTypeEnumPT,
+} from "@/utils/enums/StockMovementTypeEnum";
 import { StockMovementType } from "@/models/common/stockMovementType";
-
 
 export function Movements() {
   const [movements, setMovements] = useState<MovementReponse[]>([]);
@@ -106,7 +108,7 @@ export function Movements() {
   };
 
   const getMovementTypeLabel = (type: StockMovementType) => {
-    return StockMovementTypeEnumPT[type]
+    return StockMovementTypeEnumPT[type];
   };
 
   const getMovementTypeBadge = (type: string) => {
@@ -239,12 +241,28 @@ export function Movements() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">Todos os tipos</SelectItem>
-                        <SelectItem value={StockMovementTypeEnum.PURCHASE}>Compra</SelectItem>
-                        <SelectItem value={StockMovementTypeEnum.SALE}>Venda</SelectItem>
-                        <SelectItem value={StockMovementTypeEnum.ADJUST_IN}>Ajuste Entrada</SelectItem>
-                        <SelectItem value={StockMovementTypeEnum.ADJUST_OUT}>Ajuste Saída</SelectItem>
-                        <SelectItem value={StockMovementTypeEnum.RETURN_FROM_CLIENT}>Retorno do cliente</SelectItem>
-                        <SelectItem value={StockMovementTypeEnum.RETURN_TO_SUPPLIER}>Retorno para fornecedor</SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.PURCHASE}>
+                          Compra
+                        </SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.SALE}>
+                          Venda
+                        </SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.ADJUST_IN}>
+                          Ajuste Entrada
+                        </SelectItem>
+                        <SelectItem value={StockMovementTypeEnum.ADJUST_OUT}>
+                          Ajuste Saída
+                        </SelectItem>
+                        <SelectItem
+                          value={StockMovementTypeEnum.RETURN_FROM_CLIENT}
+                        >
+                          Retorno do cliente
+                        </SelectItem>
+                        <SelectItem
+                          value={StockMovementTypeEnum.RETURN_TO_SUPPLIER}
+                        >
+                          Retorno para fornecedor
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
