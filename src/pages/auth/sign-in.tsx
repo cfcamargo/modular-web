@@ -1,14 +1,14 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { z } from "zod";
+import { authApi } from "@/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Helmet } from "react-helmet-async";
-import { z } from "zod";
-import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
-
-import { useForm } from "react-hook-form";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import { authApi } from "@/api";
 
 const signInForm = z.object({
   email: z.string().email(),
@@ -23,6 +23,7 @@ export function SignIn() {
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<SignInForm>({
+    resolver: zodResolver(signInForm),
     defaultValues: {
       // email: searchParams.get("email") ?? "",
       email: "admin@grupomodularms.com",

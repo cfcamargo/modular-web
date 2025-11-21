@@ -1,12 +1,13 @@
-import { UserResponse } from "@/models/responses/user-response";
 import { api } from "@/lib/axios";
-import {
+import type { GridRequest } from "@/models/requests/grid-request";
+import type { PaginatedResponse } from "@/models/requests/paginated-response";
+import type { UpdateUserByCodeRequest } from "@/models/requests/reset-password-request";
+import type {
   UpdatePasswordRequest,
   UserRequest,
   UserUpdateByCodeRequest,
 } from "@/models/requests/user-request";
-import { PaginatedResponse } from "@/models/requests/paginated-response";
-import { GridRequest } from "@/models/requests/grid-request";
+import type { UserResponse } from "@/models/responses/user-response";
 
 const baseURL = "/users";
 export class UserApi {
@@ -30,13 +31,6 @@ export class UserApi {
     return api.delete(`${baseURL}/${id}`);
   }
 
-  finishRegister(
-    request: UserUpdateByCodeRequest,
-    id: number
-  ): Promise<{ data: { user: UserResponse } }> {
-    return api.patch(`${baseURL}/register/${id}`, request);
-  }
-
   update(
     request: UserRequest,
     id: number
@@ -48,5 +42,15 @@ export class UserApi {
     request: UpdatePasswordRequest
   ): Promise<{ data: { user: UserResponse } }> {
     return api.patch(`${baseURL}/update-password`, request);
+  }
+
+  getUserDetailByCode(code: string): Promise<{ data: { user: UserResponse } }> {
+    return api.get(`${baseURL}/reset-password/${code}`);
+  }
+
+  updateUserByCode(
+    request: UpdateUserByCodeRequest
+  ): Promise<{ data: { user: UserResponse } }> {
+    return api.patch(`${baseURL}/reset-password`, request);
   }
 }

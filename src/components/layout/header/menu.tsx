@@ -1,14 +1,13 @@
 import { NavLink } from "react-router-dom";
-import { MenuItem } from "./types";
 import { Button } from "@/components/ui/button";
-
 import {
   NavigationMenu,
-  NavigationMenuList,
-  NavigationMenuItem,
-  NavigationMenuTrigger,
   NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuList,
+  NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import type { MenuItem } from "./types";
 
 const menuItems: MenuItem[] = [
   {
@@ -19,38 +18,38 @@ const menuItems: MenuItem[] = [
   //   path: "/clients",
   //   name: "Clientes",
   // },
-  {
-    path: "",
-    name: "Vendas",
-    subItems: [
-      {
-        name: "Orçamentos",
-        path: "/quotes",
-      },
-      // {
-      //   name: "Pedidos",
-      //   path: "/orders",
-      // },
-    ],
-  },
-  {
-    name: "Estoque",
-    path: "",
-    subItems: [
-      {
-        path: "/products",
-        name: "Produtos",
-      },
-      {
-        path: "/movements",
-        name: "Movimentações",
-      },
-      {
-        path: "/supplier",
-        name: "Fornecedores",
-      },
-    ],
-  },
+  // {
+  //   path: "",
+  //   name: "Vendas",
+  //   subItems: [
+  //     {
+  //       name: "Orçamentos",
+  //       path: "/quotes",
+  //     },
+  //     // {
+  //     //   name: "Pedidos",
+  //     //   path: "/orders",
+  //     // },
+  //   ],
+  // },
+  // {
+  //   name: "Estoque",
+  //   path: "",
+  //   subItems: [
+  //     {
+  //       path: "/products",
+  //       name: "Produtos",
+  //     },
+  //     {
+  //       path: "/movements",
+  //       name: "Movimentações",
+  //     },
+  //     {
+  //       path: "/supplier",
+  //       name: "Fornecedores",
+  //     },
+  //   ],
+  // },
   {
     path: "/users",
     name: "Usuários",

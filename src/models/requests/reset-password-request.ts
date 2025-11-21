@@ -3,5 +3,5 @@ export interface UpdateUserByCodeRequest {
   email: string;
   document: string;
   password: string;
-  confirmPassword: string;
+  resetCode: string;
 }

@@ -1,3 +1,11 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
+import { Helmet } from "react-helmet-async";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { z } from "zod";
+import { userApi } from "@/api";
 import LoadingAnimation from "@/components/shared/loading-animation";
 import { Button } from "@/components/ui/button";
 import {
@@ -7,6 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -16,16 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
-import { Helmet } from "react-helmet-async";
-import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { userApi } from "@/api";
-import { toast } from "sonner";
 
 const formSchema = z.object({
   fullName: z
@@ -54,6 +54,7 @@ export default function CreateUser() {
   const onSubmitForm = (data: BasicDataForm) => {
     try {
       setLoading(true);
+      console.log(data);
       userApi.save(data).then(() => {
         toast.success(
           "Email enviado, o usuário pode completar seu registo através do link"
@@ -99,7 +100,7 @@ export default function CreateUser() {
                 </span>
               )}
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid xs:grid-cols-1 md:grid-cols-2 gap-4">
               <div className="grid flex-1 items-center gap-1.5">
                 <Label htmlFor="name">Email</Label>
                 <Input
@@ -136,16 +137,21 @@ export default function CreateUser() {
               </div>
             </div>
 
-            <div className="w-full flex gap-2 justify-end py-8">
+            <div className="w-full flex gap-2 xs:justify-between md:justify-end py-8">
               <Button
                 type="button"
                 variant={"outline"}
                 disabled={loading}
                 asChild
+                className="xs:w-full md:w-[150px]"
               >
                 <Link to="/users">Voltar</Link>
               </Button>
-              <Button type="submit" className="w-[100px]" disabled={loading}>
+              <Button
+                type="submit"
+                className="xs:w-full md:w-[150px]"
+                disabled={loading}
+              >
                 {loading ? <LoadingAnimation /> : "Salvar"}
               </Button>
             </div>

@@ -1,26 +1,39 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ca } from "date-fns/locale";
+import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { z } from "zod";
-import { toast } from "sonner";
-import { Link, useNavigate, useParams } from "react-router-dom";
-
 import { useForm } from "react-hook-form";
-import { Label } from "@/components/ui/label";
-import { useEffect, useState } from "react";
-import { resetPasswordApi } from "@/api";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { z } from "zod";
+import { userApi } from "@/api";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
-const signInForm = z.object({
-  email: z.string().email(),
-  fullName: z.string(),
-  document: z.string(),
-  password: z
-    .string()
-    .min(6, { message: "Precisa de pelo menos 6 caracteres" }),
-  confirmPassword: z
-    .string()
-    .min(6, { message: "Precisa de pelo menos 6 caracteres" }),
-});
+const signInForm = z
+  .object({
+    email: z.string().email(),
+    fullName: z.string(),
+    document: z.string().min(11, { message: "Digite um CPF válido" }),
+    password: z
+      .string()
+      .min(6, { message: "Precisa de pelo menos 6 caracteres" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Precisa de pelo menos 6 caracteres" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+  });
 
 type SignInForm = z.infer<typeof signInForm>;
 
@@ -28,35 +41,53 @@ export function Register() {
   const { code } = useParams();
   const navigate = useNavigate();
 
-  const [, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const form = useForm<SignInForm>({
+    resolver: zodResolver(signInForm),
+    defaultValues: {
+      email: "",
+      fullName: "",
+      document: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
   const {
-    register,
     handleSubmit,
     setValue,
-    formState: { isSubmitting },
-  } = useForm<SignInForm>();
+    formState: { isSubmitting, errors },
+  } = form;
 
   const handleSignin = async (data: SignInForm) => {
-    setLoading(true);
-    resetPasswordApi
-      .updateUserByCode(data, String(code))
-      .then(() => {
+    const request = {
+      fullName: data.fullName,
+      email: data.email,
+      document: data.document,
+      password: data.password,
+      resetCode: code!,
+    };
+
+    await userApi
+      .updateUserByCode(request)
+      .then((resp) => {
+        console.log(resp);
         toast.success("Dados salvos com sucesso, você ja pode fazer login");
         navigate("/sign-in");
       })
       .catch(() => {
         toast.error("Erro ao salvar os dados, tente novamente");
-      })
-      .finally(() => {
-        setLoading(false);
       });
   };
 
-  const handleGetUserByCode = () => {
+  const onInvalid = (errors: any) => {
+    console.log("Formulário inválido:", errors);
+  };
+
+  const handleGetUserByCode = useCallback(async () => {
     setLoading(true);
-    resetPasswordApi
+    await userApi
       .getUserDetailByCode(String(code))
       .then((response) => {
         response.data.user.email
@@ -78,11 +109,11 @@ export function Register() {
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, [code, navigate, setValue]);
 
   useEffect(() => {
     handleGetUserByCode();
-  }, []);
+  }, [handleGetUserByCode]);
 
   return (
     <>
@@ -97,56 +128,86 @@ export function Register() {
               Preencha os dados faltantes para finalizar o seu cadastro
             </p>
           </div>
-          <form className="space-y-4" onSubmit={handleSubmit(handleSignin)}>
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome completo</Label>
-              <Input
-                autoComplete="off"
-                type="text"
-                id="name"
-                {...register("fullName")}
+          <Form {...form}>
+            <form
+              className="space-y-4"
+              onSubmit={handleSubmit(handleSignin, onInvalid)}
+            >
+              <FormField
+                control={form.control}
+                name="fullName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome Completo</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Seu e-mail</Label>
-              <Input disabled type="email" id="email" {...register("email")} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-document">CPF</Label>
-              <Input
-                autoComplete="off"
-                type="text"
-                id="document"
-                {...register("document")}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
+              <FormField
+                control={form.control}
+                name="document"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>CPF</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <Input
-                autoComplete="new-password"
-                type="password"
-                id="password"
-                {...register("password")}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirme a senha</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirme a senha</Label>
-              <Input
-                type="password"
-                id="confirmPassword"
-                {...register("confirmPassword")}
-              />
-            </div>
-
-            <Button disabled={isSubmitting} className="w-full" type="submit">
-              Salvar
-            </Button>
-            <Button asChild variant={"link"} className="w-full">
-              <Link to="/sign-in">Cancelar</Link>
-            </Button>
-          </form>
+              <Button disabled={isSubmitting} className="w-full" type="submit">
+                Salvar
+              </Button>
+              <Button asChild variant={"link"} className="w-full">
+                <Link to="/sign-in">Cancelar</Link>
+              </Button>
+            </form>
+          </Form>
         </div>
       </div>
     </>
