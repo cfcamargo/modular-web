@@ -45,7 +45,7 @@ export default function TableFilter({
         value={inputValue}
       />
 
-      <Button type="submit" variant="secondary" size="xs" disabled={disabled}>
+      <Button type="submit" variant="secondary" size="sm" disabled={disabled}>
         <Search className="mr-2 h-4 w-4" />
         Filtrar resultados
       </Button>
@@ -53,7 +53,7 @@ export default function TableFilter({
       <Button
         type="button"
         variant="outline"
-        size="xs"
+        size="sm"
         disabled={disabled}
         onClick={handleClearFilter}
       >

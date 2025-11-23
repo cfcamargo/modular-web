@@ -25,28 +25,26 @@ export default function ClientTableRow({
 }: ClientTableRowProps) {
   return (
     <TableRow>
-      <TableCell className="font-mono text-xs font-medium">
-        {client.id}
-      </TableCell>
-      <TableCell className="text-muted-foreground">{client.fullName}</TableCell>
+      <TableCell className="text-muted-foreground">{client.name}</TableCell>
       <TableCell>{client.document}</TableCell>
-      <TableCell className="font-medium">{client.rgIe}</TableCell>
-      <TableCell className="font-medium">{client.type.toUpperCase()}</TableCell>
+      <TableCell className="font-medium">
+        {client.type?.toUpperCase()}
+      </TableCell>
       <TableCell className="flex gap-4 items-center">
-        <Button variant="outline" asChild size="xs">
+        <Button variant="outline" asChild>
           <Link to={`/clients/${client.id}`}>
             <Search className="h-3 w-3" />
             <span className="sr-only">Detalhes do cliente</span>
           </Link>
         </Button>
-        <Button variant="outline" asChild size="xs">
+        <Button variant="outline" asChild>
           <Link to={`/clients/${client.id}/edit`}>
             <Pen className="h-3 w-3" />
             <span className="sr-only">Editar do cliente</span>
           </Link>
         </Button>
         <AlertDialog>
-          <Button asChild variant="outline" size="xs">
+          <Button asChild variant="outline">
             <AlertDialogTrigger>
               <Trash2 className="h-3 w-3" />
             </AlertDialogTrigger>
@@ -57,8 +55,8 @@ export default function ClientTableRow({
             </AlertDialogTitle>
             <AlertDialogDescription>
               Ao confirmar essa ação, o cliente{" "}
-              <span className="text-rose-600">{client.fullName}</span> sera
-              excluido permanentemente. Esta acão não pode ser desfeita !
+              <span className="text-rose-600">{client.name}</span> sera excluido
+              permanentemente. Esta acão não pode ser desfeita !
             </AlertDialogDescription>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancelar</AlertDialogCancel>

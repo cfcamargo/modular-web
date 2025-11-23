@@ -48,20 +48,20 @@ export default function UserTableRow({
         {new Date(user.createdAt).toLocaleDateString()}
       </TableCell>
       <TableCell className="flex gap-4 items-center">
-        <Button variant="outline" asChild size="xs">
+        <Button variant="outline" asChild size="sm">
           <Link to={`/users/${user.id}`}>
             <Search className="h-3 w-3" />
             <span className="sr-only">Detalhes do Usuário</span>
           </Link>
         </Button>
-        <Button variant="outline" asChild size="xs">
+        <Button variant="outline" asChild size="sm">
           <Link to={`/users/${user.id}/edit`}>
             <Pen className="h-3 w-3" />
             <span className="sr-only">Editar Usuário</span>
           </Link>
         </Button>
         <AlertDialog>
-          <Button asChild variant="outline" size="xs">
+          <Button asChild variant="outline" size="sm">
             <AlertDialogTrigger>
               <Trash2 className="h-3 w-3" />
             </AlertDialogTrigger>

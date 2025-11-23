@@ -11,7 +11,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      if (error.config?.url?.includes("/auth/login")) {
+      const url = error.config?.url ?? "";
+
+      const isAuthRoute =
+        url.includes("/auth/login") ||
+        url.includes("/register") ||
+        url.includes("/users/reset-password");
+
+      if (isAuthRoute) {
         return Promise.reject(error);
       }
 

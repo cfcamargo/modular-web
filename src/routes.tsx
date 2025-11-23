@@ -5,10 +5,7 @@ import { AuthLayout } from "./pages/_layouts/auth";
 import { SignIn } from "./pages/auth/sign-in";
 import { ResetPassword } from "./pages/auth/reset-password";
 import Clients from "./pages/clients/clients";
-import CreateClient from "./pages/clients/create-client";
-import DetailsClient from "./pages/clients/details-client";
 import { NotFoud } from "./pages/_layouts/404";
-import EditClient from "./pages/clients/edit-client";
 import { Products } from "./pages/products/products";
 import NewProduct from "./pages/products/new-product";
 import UserList from "./pages/users/users";
@@ -26,6 +23,9 @@ import SupplierDetails from "./pages/supplier/supplier-details";
 import NewMovement from "./pages/movements/new-movement";
 import QuoteList from "./pages/quote/quotes";
 import NewQuote from "./pages/quote/new-quote";
+import { CreateClient } from "./pages/clients/create-client";
+import ClientDetails from "./pages/clients/client-details";
+import ClientEdit from "./pages/clients/client-edit";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -44,10 +44,6 @@ const protectedLoader = async () => {
   return await checkAuth();
 };
 
-const publicLoader = async () => {
-  return true;
-};
-
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -59,8 +55,8 @@ export const router = createBrowserRouter([
       { path: "/dashboard", element: <Dashboard /> },
       { path: "/clients", element: <Clients /> },
       { path: "/clients/create", element: <CreateClient /> },
-      { path: "/clients/:id", element: <DetailsClient /> },
-      { path: "/clients/:id/edit", element: <EditClient /> },
+      { path: "/clients/:id", element: <ClientDetails /> },
+      { path: "/clients/:id/edit", element: <ClientEdit /> },
       { path: "/products", element: <Products /> },
       { path: "/products/create", element: <NewProduct /> },
       { path: "/products/:id", element: <DetailsProduct /> },
@@ -80,7 +76,6 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <AuthLayout />,
-    loader: publicLoader,
     children: [
       { path: "/sign-in", element: <SignIn /> },
       { path: "/reset-password", element: <ResetPassword /> },

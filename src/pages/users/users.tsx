@@ -19,11 +19,15 @@ import Pagination from "@/components/shared/pagination";
 import { MetaProps } from "@/models/responses/meta-response";
 import { GridRequest } from "@/models/requests/grid-request";
 import { PaginationEnum } from "@/utils/enums/PaginationEnum";
+import { useUserLoggedStore } from "@/store/auth/user-logged";
+import { RoleEnum } from "@/utils/enums/RoleEnum";
 
 export default function UserList() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [meta, setMeta] = useState<MetaProps | null>();
+
+  const userStore = useUserLoggedStore();
 
   const getUsers = async (page = 1, filter?: string) => {
     setLoading(true);
@@ -69,9 +73,11 @@ export default function UserList() {
           <h1 className="text-3xl font-bold tracking-tighter">
             Usuários Cadastrados
           </h1>
-          <Button className="h-8" asChild disabled={loading}>
-            <Link to="/users/create">Novo Usuário</Link>
-          </Button>
+          {userStore.user?.role === RoleEnum.AMDMIN && (
+            <Button className="h-8" asChild disabled={loading}>
+              <Link to="/users/create">Novo Usuário</Link>
+            </Button>
+          )}
         </div>
 
         <div className="space-y-2.5">

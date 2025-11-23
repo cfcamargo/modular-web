@@ -1,34 +1,39 @@
 import { api } from "@/lib/axios";
 import {
-  ClientDetailsResponse,
-  ClientResponse,
-} from "@/models/responses/client-response";
-import { ClientRequest } from "@/models/requests/client-request";
+  ClientRequest,
+  GetClientsRequest,
+} from "@/models/requests/client-request";
+import { ClientResponse } from "@/models/responses/client-response";
 import { MetaProps } from "@/models/responses/meta-response";
 
 const baseURL = "/clients";
 export class ClientApi {
-  get(page: number): Promise<{
-    data: { clients: { meta: MetaProps; data: ClientResponse[] } };
+  get(params: GetClientsRequest): Promise<{
+    data: {
+      clients: ClientResponse[];
+      meta: MetaProps;
+    };
   }> {
-    return api.get(`${baseURL}?page=${page}`);
+    return api.get(`${baseURL}`, {
+      params,
+    });
   }
-  save(request: ClientRequest): Promise<{ data: { client: ClientResponse } }> {
+  save(request: ClientRequest): Promise<{ data: { clients: ClientResponse } }> {
     return api.post(baseURL, request);
   }
 
-  getDetails(id: number): Promise<{ data: { client: ClientDetailsResponse } }> {
+  getDetails(id: string): Promise<{ data: ClientResponse }> {
     return api.get(`${baseURL}/${id}`);
   }
 
   update(
     request: ClientRequest,
-    id: number
+    id: string
   ): Promise<{ data: { client: ClientResponse } }> {
     return api.patch(`${baseURL}/${id}`, request);
   }
 
-  destroy(id: number): Promise<void> {
+  destroy(id: string): Promise<void> {
     return api.delete(`${baseURL}/${id}`);
   }
 }

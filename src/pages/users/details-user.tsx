@@ -21,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UserResponse } from "@/models/responses/user-response";
+import { useUserLoggedStore } from "@/store/auth/user-logged";
+import { RoleEnum } from "@/utils/enums/RoleEnum";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -31,6 +33,7 @@ export function DetailsUser() {
   const [user, setUser] = useState<UserResponse | null>();
 
   const navigate = useNavigate();
+  const userStore = useUserLoggedStore();
 
   const destroyUser = () => {};
 
@@ -122,28 +125,30 @@ export function DetailsUser() {
             </CardContent>
             <CardFooter>
               <div className="w-full flex justify-end gap-2">
-                <AlertDialog>
-                  <Button asChild variant="destructive">
-                    <AlertDialogTrigger>Deletar</AlertDialogTrigger>
-                  </Button>
-                  <AlertDialogContent>
-                    <AlertDialogTitle>
-                      Tem certeza que deseja deletar o usuário?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Ao confirmar essa ação, o usuário{" "}
-                      <span className="text-rose-600">{user?.fullName}</span>{" "}
-                      sera excluido permanentemente. Esta acão não pode ser
-                      desfeita !
-                    </AlertDialogDescription>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={destroyUser}>
-                        Confirmar
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                {userStore.user?.role === RoleEnum.AMDMIN && (
+                  <AlertDialog>
+                    <Button asChild variant="destructive">
+                      <AlertDialogTrigger>Deletar</AlertDialogTrigger>
+                    </Button>
+                    <AlertDialogContent>
+                      <AlertDialogTitle>
+                        Tem certeza que deseja deletar o usuário?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Ao confirmar essa ação, o usuário{" "}
+                        <span className="text-rose-600">{user?.fullName}</span>{" "}
+                        sera excluido permanentemente. Esta acão não pode ser
+                        desfeita !
+                      </AlertDialogDescription>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={destroyUser}>
+                          Confirmar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
                 <Button variant={"secondary"} asChild>
                   <Link to={`/users/${user?.id!}/edit`}>Editar</Link>
                 </Button>

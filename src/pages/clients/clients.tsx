@@ -6,30 +6,39 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Helmet } from "react-helmet-async";
-import ClientTableFilters from "./components/client-table-filters";
 import ClientTableRow from "./components/client-table-row";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { ClientResponse } from "@/models/responses/client-response";
 import { clientApi } from "@/api";
 import { toast } from "sonner";
 import { MetaProps } from "@/models/responses/meta-response";
 import LoadingAnimation from "@/components/shared/loading-animation";
 import Pagination from "@/components/shared/pagination";
+import { SearchInput } from "@/components/shared/search-input";
+import { GetClientsRequest } from "@/models/requests/client-request";
 
 export default function Clients() {
   const [clients, setClients] = useState<ClientResponse[]>([]);
-  const [meta, setMeta] = useState<MetaProps | null>();
+  const [meta, setMeta] = useState<MetaProps | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const getClients = async (page = 1) => {
+  // 1. Função principal de busca
+  const getClients = useCallback(async (page = 1, searchTerm?: string) => {
+    console.log("Search Term:", searchTerm); // Agora isso só vai aparecer quando realmente mudar
     setLoading(true);
+    const params: GetClientsRequest = {
+      page,
+      perPage: 20,
+      searchTerm,
+    };
+
     await clientApi
-      .get(page)
+      .get(params)
       .then((response) => {
-        setClients(response.data.clients.data);
-        setMeta(response.data.clients.meta);
+        setClients(response.data.clients);
+        setMeta(response.data.meta);
       })
       .catch(() => {
         toast.error("Erro ao buscar clientes");
@@ -37,14 +46,21 @@ export default function Clients() {
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, []);
+
+  const handleSearch = useCallback(
+    (term: string) => {
+      getClients(1, term);
+    },
+    [getClients]
+  );
 
   const destroyClient = async (client: ClientResponse) => {
     clientApi
-      .destroy(client.id)
+      .destroy(String(client.id))
       .then(() => {
-        getClients();
-        toast.success(`O cliente ${client.fullName} foi deletado com sucesso`);
+        getClients(meta?.page || 1);
+        toast.success(`O cliente ${client.name} foi deletado com sucesso`);
       })
       .catch(() => {
         toast.error("Erro ao deletar cliente");
@@ -53,7 +69,7 @@ export default function Clients() {
 
   useEffect(() => {
     getClients();
-  }, []);
+  }, [getClients]);
 
   return (
     <>
@@ -67,7 +83,7 @@ export default function Clients() {
         </div>
 
         <div className="space-y-2.5">
-          <ClientTableFilters disabled={clients.length === 0} />
+          <SearchInput onSearch={handleSearch} />
 
           <div className="rounded-md border">
             {loading ? (
@@ -76,13 +92,10 @@ export default function Clients() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[140px]">ID</TableHead>
                     <TableHead>Nome do cliente</TableHead>
                     <TableHead className="w-[140px]">CPF</TableHead>
-                    <TableHead>RG</TableHead>
                     <TableHead>Tipo</TableHead>
-                    <TableHead></TableHead>
-                    <TableHead></TableHead>
+                    <TableHead>Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -99,6 +112,7 @@ export default function Clients() {
               </Table>
             )}
           </div>
+
           {meta && clients.length > 0 && (
             <Pagination
               pageIndex={meta.page}
@@ -108,7 +122,8 @@ export default function Clients() {
               getData={getClients}
             />
           )}
-          {clients.length === 0 && (
+
+          {!loading && clients.length === 0 && (
             <div className="w-full py-8 flex justify-center">
               <span className="text-zinc-600">Sem clientes cadastrados</span>
             </div>

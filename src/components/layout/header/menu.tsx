@@ -14,10 +14,10 @@ const menuItems: MenuItem[] = [
     path: "/dashboard",
     name: "Dashboard",
   },
-  // {
-  //   path: "/clients",
-  //   name: "Clientes",
-  // },
+  {
+    path: "/clients",
+    name: "Clientes",
+  },
   // {
   //   path: "",
   //   name: "Vendas",

@@ -1,20 +1,23 @@
-import { AddressProps } from "../data/address";
-import { ContactProps } from "../data/contact";
+import { SupplierType } from "../requests/client-request";
 
-export interface ClientResponse {
-  id: number;
-  fullName: string;
-  type: "pj" | "pf";
-  fantasyName: string;
-  document: string;
-  rgIe: string;
-  im: string;
-  createdAt: string;
-  updatedAt: string;
-  birthdate?: string;
+export interface AddressResponse {
+  id: string;
+  street: string;
+  number: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
 }
 
-export interface ClientDetailsResponse extends ClientResponse {
-  address: AddressProps | null;
-  contacts: ContactProps[];
+export interface ClientResponse {
+  id?: string;
+  name: string;
+  document: string;
+  type?: SupplierType;
+  email?: string;
+  phone?: string;
+  status?: number;
+  address?: AddressResponse;
 }

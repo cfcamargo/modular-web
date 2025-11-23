@@ -1,87 +1,39 @@
-import { FormProgress } from "@/components/shared/form-progress";
-import { useEffect, useState } from "react";
-import FormClientType from "./components/form-client-type";
-import FormBasicDataPf from "./components/form-basic-data-pf";
-import FormBasicDataPJ from "./components/form-basic-data-pj";
-import { FormAddressData } from "./components/form-address-data";
-import { FormContactData } from "./components/form-contact-data";
-import { FormResumData } from "./components/form-resum-data";
-import { useClientStore } from "@/store/clients/client";
+import { useState } from "react";
+import { toast } from "sonner";
+import { clientApi } from "@/api";
+import { ClientRequest } from "@/models/requests/client-request";
+import { useNavigate } from "react-router-dom";
+import { getErrorMessage } from "@/utils/getErrorMessage";
+import { Helmet } from "react-helmet-async";
+import { ClientForm } from "./components/client-form";
 
-export default function CreateClient() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const steps = [
-    { label: "Tipo de Cliente", description: "PJ ou PF" },
-    { label: "Dados Basicos", description: "Cadastre as informações básicas" },
-    { label: "Endereço", description: "Cadastre o Endereço" },
-    { label: "Contato", description: "Adiciona Contatos" },
-    { label: "Resumo", description: "Confirme as informações" },
-  ];
-  const [clientType, setClientType] = useState<"pj" | "pf">("pf");
-  const { reset } = useClientStore();
+export function CreateClient() {
+  const [isLoading, setIsLoading] = useState(false);
 
-  const nextStep = () =>
-    setCurrentStep((prev) => Math.min(prev + 1, steps.length));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+  const navigate = useNavigate();
 
-  const getComponent = () => {
-    if (currentStep === 1) {
-      return (
-        <FormClientType
-          setClientType={setClientType}
-          nextProgress={() => nextStep()}
-        />
-      );
-    }
-    if (currentStep === 2) {
-      if (clientType === "pf") {
-        return (
-          <FormBasicDataPf
-            backProgress={() => prevStep()}
-            nextProgress={() => nextStep()}
-          />
-        );
-      }
-
-      return (
-        <FormBasicDataPJ
-          backProgress={() => prevStep()}
-          nextProgress={() => nextStep()}
-        />
-      );
-    }
-
-    if (currentStep === 3) {
-      return (
-        <FormAddressData
-          backProgress={() => prevStep()}
-          nextProgress={() => nextStep()}
-        />
-      );
-    }
-
-    if (currentStep === 4) {
-      return (
-        <FormContactData
-          backProgress={() => prevStep()}
-          nextProgress={() => nextStep()}
-        />
-      );
-    }
-
-    if (currentStep === 5) {
-      return <FormResumData backProgress={() => prevStep()} />;
+  const handleCreate = async (data: ClientRequest) => {
+    setIsLoading(true);
+    try {
+      await clientApi.save(data);
+      toast.success("Cliente cadastrado com sucesso!");
+      navigate("/clients");
+    } catch (error: any) {
+      const message = getErrorMessage(error);
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    reset();
-  }, []);
-
   return (
     <>
-      <FormProgress currentStep={currentStep} steps={steps} />
-      <div className="mt-4">{getComponent()}</div>
+      <Helmet title="Novo Cliente" />
+      <ClientForm
+        pageTitle="Novo Cliente"
+        isLoading={isLoading}
+        onSubmit={handleCreate}
+      />
     </>
   );
 }
