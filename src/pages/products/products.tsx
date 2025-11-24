@@ -1,7 +1,6 @@
 import { productApi } from "@/api";
 import LoadingAnimation from "@/components/shared/loading-animation";
 import Pagination from "@/components/shared/pagination";
-import TableFilter from "@/components/shared/table-filter";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,20 +11,24 @@ import {
 } from "@/components/ui/table";
 import { MetaProps } from "@/models/responses/meta-response";
 import { ProductResponse } from "@/models/responses/product-response";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import ProductTableRow from "./components/product-table-row";
 import { GridRequest } from "@/models/requests/grid-request";
 import { PaginationEnum } from "@/utils/enums/PaginationEnum";
+import { SearchInput } from "@/components/shared/search-input";
+import { getErrorMessage } from "@/utils/getErrorMessage";
 
 export function Products() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [meta, setMeta] = useState<MetaProps | null>();
 
-  const getProducts = async (page: number = 1, filter?: string) => {
+  const navigate = useNavigate();
+
+  const getProducts = useCallback(async (page: number = 1, filter?: string) => {
     const productPaylod: GridRequest = {
       page,
       perPage: PaginationEnum.PER_PAGE20,
@@ -37,12 +40,12 @@ export function Products() {
       .get(productPaylod)
       .then((response) => {
         let meta: MetaProps = {
-          lastPage: response.data.lastPage,
-          page: Number(response.data.page),
-          perPage: Number(response.data.perPage),
-          total: response.data.total,
+          lastPage: response.data.meta.lastPage,
+          page: Number(response.data.meta.page),
+          perPage: Number(response.data.meta.perPage),
+          total: response.data.meta.total,
         };
-        setProducts(response.data.data);
+        setProducts(response.data.products);
         setMeta(meta);
       })
       .catch(() => {
@@ -51,11 +54,27 @@ export function Products() {
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, []);
 
   const destroyProduct = async (product: ProductResponse) => {
-    console.log(product);
+    await productApi
+      .destroy(product.id)
+      .then(() => {
+        toast.success("Produto deletado com sucesso");
+        navigate("/products");
+      })
+      .catch((error) => {
+        const message = getErrorMessage(error);
+        toast.error(message ?? "Erro ao deletar o produto");
+      });
   };
+
+  const handleSearch = useCallback(
+    (term: string) => {
+      getProducts(1, term);
+    },
+    [getProducts]
+  );
 
   useEffect(() => {
     getProducts();
@@ -77,22 +96,19 @@ export function Products() {
         </div>
 
         <div className="space-y-2.5">
-          <TableFilter
-            disabled={products.length === 0}
-            description="Nome do produto"
-            onClearFilter={() => {}}
-            onSubmitFilter={() => {}}
-          />
+          <SearchInput onSearch={handleSearch} />
 
           <div className="rounded-md border">
             {loading ? (
-              <LoadingAnimation />
+              <div className="w-full h-full flex justify-center items-center">
+                <LoadingAnimation />
+              </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
-                    <TableHead>Marca</TableHead>
+                    <TableHead>Preco</TableHead>
                     <TableHead className="w-[100px]">Unidade</TableHead>
                     <TableHead className="w-[100px]">Em estoque</TableHead>
                     <TableHead className="flex-1 overflow-ellipsis">

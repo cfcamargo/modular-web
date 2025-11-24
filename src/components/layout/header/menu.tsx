@@ -32,24 +32,20 @@ const menuItems: MenuItem[] = [
   //     // },
   //   ],
   // },
-  // {
-  //   name: "Estoque",
-  //   path: "",
-  //   subItems: [
-  //     {
-  //       path: "/products",
-  //       name: "Produtos",
-  //     },
-  //     {
-  //       path: "/movements",
-  //       name: "Movimentações",
-  //     },
-  //     {
-  //       path: "/supplier",
-  //       name: "Fornecedores",
-  //     },
-  //   ],
-  // },
+  {
+    name: "Estoque",
+    path: "",
+    subItems: [
+      {
+        path: "/products",
+        name: "Produtos",
+      },
+      // {
+      //   path: "/movements",
+      //   name: "Movimentações",
+      // },
+    ],
+  },
   {
     path: "/users",
     name: "Usuários",

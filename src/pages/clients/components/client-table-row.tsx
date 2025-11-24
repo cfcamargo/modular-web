@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { ClientResponse } from "@/models/responses/client-response";
+import { useUserLoggedStore } from "@/store/auth/user-logged";
+import { RoleEnum } from "@/utils/enums/RoleEnum";
 import { Pen, Search, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -23,6 +25,8 @@ export default function ClientTableRow({
   client,
   destroyClient,
 }: ClientTableRowProps) {
+  const userLoggedStore = useUserLoggedStore();
+
   return (
     <TableRow>
       <TableCell className="text-muted-foreground">{client.name}</TableCell>
@@ -43,29 +47,31 @@ export default function ClientTableRow({
             <span className="sr-only">Editar do cliente</span>
           </Link>
         </Button>
-        <AlertDialog>
-          <Button asChild variant="outline">
-            <AlertDialogTrigger>
-              <Trash2 className="h-3 w-3" />
-            </AlertDialogTrigger>
-          </Button>
-          <AlertDialogContent>
-            <AlertDialogTitle>
-              Tem certeza que deseja deletar o cliente?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Ao confirmar essa ação, o cliente{" "}
-              <span className="text-rose-600">{client.name}</span> sera excluido
-              permanentemente. Esta acão não pode ser desfeita !
-            </AlertDialogDescription>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={destroyClient}>
-                Confirmar
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {userLoggedStore.user?.role === RoleEnum.AMDMIN && (
+          <AlertDialog>
+            <Button asChild variant="outline">
+              <AlertDialogTrigger>
+                <Trash2 className="h-3 w-3" />
+              </AlertDialogTrigger>
+            </Button>
+            <AlertDialogContent>
+              <AlertDialogTitle>
+                Tem certeza que deseja deletar o cliente?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Ao confirmar essa ação, o cliente{" "}
+                <span className="text-rose-600">{client.name}</span> sera
+                excluido permanentemente. Esta acão não pode ser desfeita !
+              </AlertDialogDescription>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={destroyClient}>
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </TableCell>
     </TableRow>
   );

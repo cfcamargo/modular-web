@@ -1,7 +1,7 @@
 export interface ProductRequest {
   name: string;
-  brand: string;
+  initialStock: number;
+  price: number;
   unit: "KG" | "UN" | "M2";
-  description?: string
-  marginPercent: number
+  description?: string;
 }
