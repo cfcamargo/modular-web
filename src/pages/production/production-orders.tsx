@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Plus,
   Factory,
-  Calendar,
   CheckCircle,
   Clock,
   AlertCircle,
@@ -44,15 +43,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { da, ptBR } from "date-fns/locale";
+import { ptBR } from "date-fns/locale";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -218,7 +211,7 @@ export function ProductionOrders() {
           console.log(resp);
           setOrders(resp.data.orders);
         })
-        .catch((err) => {
+        .catch(() => {
           toast.error("Erro ao buscar produtos");
           setOrders([]);
         })
@@ -410,7 +403,7 @@ export function ProductionOrders() {
           value={filterStatus}
           onValueChange={(value) => {
             setFilterStatus(value as FilterStatusType);
-            getProductionOrders(1, "", value);
+            getProductionOrders(1, "", value as FilterStatusType);
           }}
         >
           <SelectTrigger id="status-filter" className="w-[200px]">
