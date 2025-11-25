@@ -173,7 +173,7 @@ export function Products() {
                   ))}
                 </div>
 
-                <div className="hidden md:block border rounded-md bg-white">
+                <div className="hidden md:block border rounded-md">
                   <Table>
                     <TableHeader>
                       <TableRow>
