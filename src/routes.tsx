@@ -21,7 +21,7 @@ import NewQuote from "./pages/quote/new-quote";
 import { CreateClient } from "./pages/clients/create-client";
 import ClientDetails from "./pages/clients/client-details";
 import ClientEdit from "./pages/clients/client-edit";
-import { ProductionOrders } from "./pages/production/production-orders";
+import ProductionOrders from "./pages/production/production-orders";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
