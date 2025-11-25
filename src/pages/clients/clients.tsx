@@ -1,3 +1,9 @@
+import { useCallback, useEffect, useState } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
+import { toast } from "sonner";
+import { User, FileText, Trash, Edit, Briefcase } from "lucide-react";
+
 import {
   Table,
   TableBody,
@@ -5,18 +11,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Helmet } from "react-helmet-async";
-import ClientTableRow from "./components/client-table-row";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useEffect, useState, useCallback } from "react";
-import { ClientResponse } from "@/models/responses/client-response";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
 import { clientApi } from "@/api";
-import { toast } from "sonner";
-import { MetaProps } from "@/models/responses/meta-response";
 import LoadingAnimation from "@/components/shared/loading-animation";
 import Pagination from "@/components/shared/pagination";
 import { SearchInput } from "@/components/shared/search-input";
+import ClientTableRow from "./components/client-table-row";
+
+import { ClientResponse } from "@/models/responses/client-response";
+import { MetaProps } from "@/models/responses/meta-response";
 import { GetClientsRequest } from "@/models/requests/client-request";
 
 export default function Clients() {
@@ -24,9 +35,7 @@ export default function Clients() {
   const [meta, setMeta] = useState<MetaProps | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // 1. Função principal de busca
   const getClients = useCallback(async (page = 1, searchTerm?: string) => {
-    console.log("Search Term:", searchTerm); // Agora isso só vai aparecer quando realmente mudar
     setLoading(true);
     const params: GetClientsRequest = {
       page,
@@ -74,42 +83,103 @@ export default function Clients() {
   return (
     <>
       <Helmet title="Clientes" />
-      <div className="flex flex-col gap-4">
-        <div className="w-full flex justify-between items-center">
-          <h1 className="text-3xl font-bold tracking-tighter">Clientes</h1>
-          <Button className="h-8" asChild disabled={loading}>
-            <Link to="/clients/create">Novo Cliente</Link>
-          </Button>
+      <div className="flex flex-col gap-4 pb-20 md:pb-0">
+        <div className="w-full flex flex-col xs:flex-row justify-between items-start xs:items-center gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tighter">
+            Clientes
+          </h1>
+          <div className="flex gap-2 w-full xs:w-auto">
+            <Button
+              className="h-10 xs:h-9 w-full xs:w-auto"
+              asChild
+              disabled={loading}
+            >
+              <Link to="/clients/create">Novo Cliente</Link>
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-2.5">
           <SearchInput onSearch={handleSearch} />
 
-          <div className="rounded-md border">
+          <div className="rounded-md border-none md:border">
             {loading ? (
-              <LoadingAnimation />
+              <div className="w-full h-40 flex justify-center items-center">
+                <LoadingAnimation />
+              </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome do cliente</TableHead>
-                    <TableHead className="w-[140px]">CPF</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {clients.map((client) => {
-                    return (
-                      <ClientTableRow
-                        client={client}
+              <>
+                <div className="grid grid-cols-1 gap-4 md:hidden">
+                  {clients.map((client) => (
+                    <NavLink to={`/clients/${client.id}`}>
+                      <Card
                         key={client.id}
-                        destroyClient={() => destroyClient(client)}
-                      />
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                        className="shadow-sm border-l-4 border-l-primary/20"
+                      >
+                        <CardHeader className="p-4 pb-2">
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              <div className="p-2 bg-muted rounded-full">
+                                <User className="w-4 h-4 text-muted-foreground" />
+                              </div>
+                              <div>
+                                <h3 className="font-bold text-lg leading-tight">
+                                  {client.name}
+                                </h3>
+                                {client.type && (
+                                  <Badge
+                                    variant="secondary"
+                                    className="mt-1 text-xs"
+                                  >
+                                    {client.type}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-2 pb-3 space-y-3">
+                          <div className="flex items-center justify-between text-sm bg-muted/20 p-2 rounded">
+                            <span className="text-muted-foreground flex items-center gap-1.5">
+                              <FileText className="w-4 h-4" /> Documento
+                              (CPF/CNPJ):
+                            </span>
+                            <span className="font-mono font-medium">
+                              {client.document || "Não informado"}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </NavLink>
+                  ))}
+                </div>
+
+                <div className="hidden md:block border rounded-md bg-white">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome do cliente</TableHead>
+                        <TableHead className="w-[180px]">Documento</TableHead>
+                        <TableHead>Tipo</TableHead>
+                        <TableHead className="w-[140px] text-right">
+                          Ações
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {clients.map((client) => {
+                        return (
+                          <ClientTableRow
+                            client={client}
+                            key={client.id}
+                            destroyClient={() => destroyClient(client)}
+                          />
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </>
             )}
           </div>
 
@@ -124,8 +194,10 @@ export default function Clients() {
           )}
 
           {!loading && clients.length === 0 && (
-            <div className="w-full py-8 flex justify-center">
-              <span className="text-zinc-600">Sem clientes cadastrados</span>
+            <div className="w-full py-8 flex justify-center border rounded-lg border-dashed bg-muted/10">
+              <span className="text-zinc-600 flex items-center gap-2">
+                <Briefcase className="w-4 h-4" /> Sem clientes cadastrados
+              </span>
             </div>
           )}
         </div>

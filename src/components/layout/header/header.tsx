@@ -9,13 +9,19 @@ export default function Header() {
         <div className="rounded-full w-14 h-14 overflow-hidden">
           <img src="/logo.jpg" alt="" className="h-full w-full" />
         </div>
-        <span className="absolute text-red-600 z-10 -right-1 -bottom-1 px-1 bg-white rounded-lg border-red-600 border-1 text-xs shadow-md">v0.1</span>
+        <span className="absolute text-red-600 z-10 -right-1 -bottom-1 px-1 bg-white rounded-lg border-red-600 border-1 text-xs shadow-md">
+          v0.1
+        </span>
       </div>
 
-
       <div className="flex flex-1 justify-between">
-        <Menu />
-        <div className="flex items-end gap-4">
+        <div className="xs:ml-auto md:ml-0 flex gap-2">
+          <div className="xs:flex md:hidden">
+            <ThemeToggle />
+          </div>
+          <Menu />
+        </div>
+        <div className="xs:hidden md:flex items-end gap-4">
           <ThemeToggle />
           <UserProfile />
         </div>
