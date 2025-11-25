@@ -16,16 +16,12 @@ import { authApi } from "./api";
 import { useUserLoggedStore } from "@/store/auth/user-logged.ts";
 import { toast } from "sonner";
 import DetailsProduct from "./pages/products/details-product";
-import { Movements } from "./pages/movements/movements";
-import Supplier from "./pages/supplier/supplier";
-import NewSupplier from "./pages/supplier/new-supplier";
-import SupplierDetails from "./pages/supplier/supplier-details";
-import NewMovement from "./pages/movements/new-movement";
 import QuoteList from "./pages/quote/quotes";
 import NewQuote from "./pages/quote/new-quote";
 import { CreateClient } from "./pages/clients/create-client";
 import ClientDetails from "./pages/clients/client-details";
 import ClientEdit from "./pages/clients/client-edit";
+import { ProductionOrders } from "./pages/production/production-orders";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -60,15 +56,11 @@ export const router = createBrowserRouter([
       { path: "/products", element: <Products /> },
       { path: "/products/create", element: <NewProduct /> },
       { path: "/products/:id", element: <DetailsProduct /> },
-      { path: "/movements", element: <Movements /> },
-      { path: "/movements/new", element: <NewMovement /> },
+      { path: "/production", element: <ProductionOrders /> },
       { path: "/users", element: <UserList /> },
       { path: "/users/create", element: <CreateUser /> },
       { path: "/users/:id/edit", element: <CreateUser /> },
       { path: "/users/:id", element: <DetailsUser /> },
-      { path: "/supplier", element: <Supplier /> },
-      { path: "/supplier/create", element: <NewSupplier /> },
-      { path: "/supplier/:id", element: <SupplierDetails /> },
       { path: "/quotes", element: <QuoteList /> },
       { path: "/quotes/create", element: <NewQuote /> },
     ],

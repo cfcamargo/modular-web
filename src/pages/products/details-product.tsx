@@ -21,7 +21,7 @@ export default function EditProduct() {
       .then((resp) => {
         setProduct(resp.data);
       })
-      .catch((err) => {
+      .catch(() => {
         toast.error("Erro ao buscar o produto");
       })
       .finally(() => {

@@ -40,10 +40,10 @@ const menuItems: MenuItem[] = [
         path: "/products",
         name: "Produtos",
       },
-      // {
-      //   path: "/movements",
-      //   name: "Movimentações",
-      // },
+      {
+        path: "/production",
+        name: "Producao",
+      },
     ],
   },
   {
