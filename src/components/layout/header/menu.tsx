@@ -19,6 +19,10 @@ const menuItems: MenuItem[] = [
     path: "/clients",
     name: "Clientes",
   },
+  {
+    path: "/quotes",
+    name: "Pedidos",
+  },
   // {
   //   path: "",
   //   name: "Vendas",
