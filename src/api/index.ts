@@ -1,5 +1,6 @@
 import { AuthApi } from "./auth-api";
 import { ClientApi } from "./client-api";
+import { OrderApi } from "./order-api";
 import { ProductApi } from "./product-api";
 import { ProductionApi } from "./production-api";
 import { SupplierApi } from "./supplierApi";
@@ -11,3 +12,4 @@ export const userApi = new UserApi();
 export const authApi = new AuthApi();
 export const supplierApi = new SupplierApi();
 export const productionApi = new ProductionApi();
+export const orderApi = new OrderApi();

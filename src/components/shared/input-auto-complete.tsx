@@ -3,7 +3,6 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
-// Hook personalizado para debounce
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -27,8 +26,8 @@ interface BaseOption {
 
 interface InputAutoCompleteProps<T extends BaseOption> {
   placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
+  value?: string;
+  onChange?: (value: string) => void;
   onSelect: (option: T | null) => void;
   options: T[];
   selectedOption?: T | null;
@@ -38,14 +37,13 @@ interface InputAutoCompleteProps<T extends BaseOption> {
   className?: string;
   showIcon?: boolean;
   emptyMessage?: string;
-  clearOnSelect?: boolean;
   showAllOption?: boolean;
   allOptionLabel?: string;
 }
 
 export function InputAutoComplete<T extends BaseOption>({
   placeholder = "Buscar...",
-  value,
+  value = "",
   onChange,
   onSelect,
   options,
@@ -56,7 +54,6 @@ export function InputAutoComplete<T extends BaseOption>({
   className,
   showIcon = true,
   emptyMessage = "Nenhum resultado encontrado",
-  clearOnSelect = true,
   showAllOption = true,
   allOptionLabel = "Todos",
 }: InputAutoCompleteProps<T>) {
@@ -65,31 +62,30 @@ export function InputAutoComplete<T extends BaseOption>({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Debounce do termo de busca
   const debouncedSearchTerm = useDebounce(searchTerm, debounceMs);
 
-  // Filtrar opções baseado no termo de busca
   const filteredOptions = useMemo(() => {
     if (!debouncedSearchTerm) return [];
-    
+
     return options
       .filter((option) =>
-        option.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
+        option.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()),
       )
       .slice(0, maxResults);
   }, [options, debouncedSearchTerm, maxResults]);
 
-  // Sincronizar valor externo com estado interno
   useEffect(() => {
-    setSearchTerm(value);
-  }, [value]);
+    if (selectedOption) {
+      setSearchTerm(selectedOption.name);
+    }
+  }, [selectedOption]);
 
-  // Notificar mudanças no termo de busca debounced
   useEffect(() => {
-    onChange(debouncedSearchTerm);
+    if (onChange) {
+      onChange(debouncedSearchTerm);
+    }
   }, [debouncedSearchTerm, onChange]);
 
-  // Fechar dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -112,9 +108,8 @@ export function InputAutoComplete<T extends BaseOption>({
     const newValue = e.target.value;
     setSearchTerm(newValue);
     setShowDropdown(true);
-    
-    // Se o campo for limpo, limpar seleção
-    if (!newValue) {
+
+    if (selectedOption && newValue !== selectedOption.name) {
       onSelect(null);
     }
   };
@@ -125,19 +120,31 @@ export function InputAutoComplete<T extends BaseOption>({
 
   const handleOptionSelect = (option: T | null) => {
     onSelect(option);
-    
-    if (clearOnSelect) {
-      setSearchTerm("");
+
+    if (option) {
+      setSearchTerm(option.name); // Mantém o nome no input
     } else {
-      setSearchTerm(option?.name || "");
+      setSearchTerm("");
     }
-    
+
     setShowDropdown(false);
+
     inputRef.current?.blur();
   };
 
-  const shouldShowDropdown = showDropdown && (searchTerm || selectedOption);
-  const hasResults = filteredOptions.length > 0;
+  const handleClear = () => {
+    setSearchTerm("");
+    onSelect(null);
+    setShowDropdown(true);
+    inputRef.current?.focus();
+  };
+
+  const showClearButton = searchTerm.length > 0 || !!selectedOption;
+
+  const shouldShowDropdown =
+    showDropdown &&
+    !selectedOption &&
+    (filteredOptions.length > 0 || loading || searchTerm);
 
   return (
     <div className="relative">
@@ -153,15 +160,15 @@ export function InputAutoComplete<T extends BaseOption>({
           onFocus={handleInputFocus}
           className={cn(
             showIcon && "pl-10",
-            selectedOption && "pr-8",
-            className
+            showClearButton && "pr-8",
+            className,
           )}
         />
-        {selectedOption && (
+        {showClearButton && (
           <button
             type="button"
-            onClick={() => handleOptionSelect(null)}
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={handleClear}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-slate-100"
           >
             <X className="h-4 w-4" />
           </button>
@@ -174,41 +181,40 @@ export function InputAutoComplete<T extends BaseOption>({
           className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto"
         >
           <div className="p-2">
-            {showAllOption && searchTerm && (
+            {/* Opção "Todos" ou limpar filtro (opcional) */}
+            {showAllOption && searchTerm && !loading && (
               <div
-                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm"
+                className="px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm font-medium text-muted-foreground"
                 onClick={() => handleOptionSelect(null)}
               >
                 {allOptionLabel}
               </div>
             )}
-            
+
             {loading ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
+              <div className="px-3 py-2 text-sm text-muted-foreground text-center">
                 Carregando...
               </div>
-            ) : hasResults ? (
+            ) : filteredOptions.length > 0 ? (
               filteredOptions.map((option) => (
                 <div
                   key={option.id}
-                  className="px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm"
+                  className={cn(
+                    "px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-sm",
+                    selectedOption?.id === option.id &&
+                      "bg-accent/50 font-medium",
+                  )}
                   onClick={() => handleOptionSelect(option)}
                 >
                   {option.name}
                 </div>
               ))
             ) : searchTerm ? (
-              <div className="px-3 py-2 text-sm text-muted-foreground">
+              <div className="px-3 py-2 text-sm text-muted-foreground text-center">
                 {emptyMessage}
               </div>
             ) : null}
           </div>
-        </div>
-      )}
-
-      {selectedOption && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          Selecionado: {selectedOption.name}
         </div>
       )}
     </div>
