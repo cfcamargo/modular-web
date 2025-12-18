@@ -34,6 +34,7 @@ import { BaseOption } from "@/models/common/baseOption";
 import { ProductLineItem } from "./components/ProductLineItem";
 import { useUserLoggedStore } from "@/store/auth/user-logged";
 import { useNavigate } from "react-router-dom";
+import { OrderStatusEnum } from "@/utils/enums/OrderStatusEnum";
 
 const orderItemSchema = z.object({
   productId: z.string().min(1, "Selecione um produto"),
@@ -98,7 +99,8 @@ export default function NewQuote() {
       observation: "",
       shippingCost: data.shippingCost,
       totalDiscount: data.discount,
-      status: status === "draft" ? "DRAFT" : "CONFIRMED",
+      status:
+        status === "draft" ? OrderStatusEnum.DRAFT : OrderStatusEnum.CONFIRMED,
       items: watchItems.map((item) => ({
         productId: item.productId,
         quantity: Number(item.quantity),
@@ -109,15 +111,15 @@ export default function NewQuote() {
 
     await orderApi
       .createOrder(payload)
-      .then((resp) => {
+      .then(() => {
         toast.success(
           status === "draft"
             ? "O orçamento foi criado com sucesso"
             : "O pedido foi criado com sucesso",
         );
-        navigate("/quote");
+        navigate("/quotes");
       })
-      .catch((error) => {
+      .catch(() => {
         toast.error("Erro ao criar orçamento");
       })
       .finally(() => {
