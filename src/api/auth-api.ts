@@ -27,4 +27,11 @@ export class AuthApi {
   async loggout(): Promise<{ message: string }> {
     return await api.post(`${baseRoute}/logout`);
   }
+
+  async changePassword(request: {
+    currentPassword: string;
+    newPassword: string;
+  }) {
+    return api.post(`${baseRoute}/change-password`, request);
+  }
 }

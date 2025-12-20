@@ -17,11 +17,14 @@ import { authApi } from "@/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { getUserInitials } from "@/utils/stringUtils";
+import { ChangePasswordModal } from "./change-password";
 
 export default function UserProfile() {
   const { user } = useUserLoggedStore();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
   const handleLogout = async () => {
     setLoading(true);
@@ -64,12 +67,11 @@ export default function UserProfile() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <Button variant={"ghost"} disabled={loading} onClick={handleLogout}>
-              <User size={16} className="opacity-60" aria-hidden="true" />
-              <span>Meu perfil</span>
-            </Button>
-          </DropdownMenuItem>
+          <ChangePasswordModal
+            open={openPasswordModal}
+            handleToggle={setOpenPasswordModal}
+            handleLoggout={handleLogout}
+          />
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
