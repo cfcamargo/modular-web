@@ -18,3 +18,35 @@ export interface OrderResponse {
   clientId: string;
   userId: string;
 }
+
+export interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+  product: {
+    id: string;
+    name: string;
+    unit: string;
+    description: string;
+    status: number;
+  };
+  quantity: number;
+  deliveredQuantity: number;
+  price: string; // Vem como string do backend (Decimal)
+  subtotal: string; // Vem como string do backend (Decimal)
+}
+
+export interface OrderDetailsResponse extends OrderResponse {
+  client: {
+    createdAt: string;
+    document: string;
+    email: string;
+    id: string;
+    name: string;
+    phone: string | null;
+    status: number;
+    type: string;
+    updatedAt: string;
+  } | null;
+  items: OrderItem[];
+}

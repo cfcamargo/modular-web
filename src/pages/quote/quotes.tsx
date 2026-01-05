@@ -88,7 +88,6 @@ const STATUS_CONFIG: Record<
 };
 
 export default function Quotes() {
-  // --- Estados ---
   const [orders, setOrders] = useState<OrderResponse[]>([]);
   const [meta, setMeta] = useState<MetaProps | null>(null);
   const [loading, setLoading] = useState(false);
@@ -447,22 +446,16 @@ export default function Quotes() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            title="Visualizar Detalhes"
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            title="Editar Pedido"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
+                          <Link to={`/quotes/${order.id}`}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              title="Visualizar Detalhes"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
                         </div>
                       </TableCell>
                     </TableRow>

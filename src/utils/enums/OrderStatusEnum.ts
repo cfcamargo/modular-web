@@ -1,7 +1,7 @@
 export enum OrderStatusEnum {
   DRAFT = "DRAFT",
   CONFIRMED = "CONFIRMED",
-  CANCELED = "CANCELED",
+  CANCELED = "CANCELLED",
   SHIPMENT = "SHIPMENT",
   DONE = "DONE",
 }

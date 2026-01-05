@@ -23,6 +23,7 @@ import ClientDetails from "./pages/clients/client-details";
 import ClientEdit from "./pages/clients/client-edit";
 import ProductionOrders from "./pages/production/production-orders";
 import Quotes from "./pages/quote/quotes";
+import { OrderDetails } from "./pages/quote/quote-details";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -64,6 +65,7 @@ export const router = createBrowserRouter([
       { path: "/users/:id", element: <DetailsUser /> },
       { path: "/quotes", element: <Quotes /> },
       { path: "/quotes/create", element: <NewQuote /> },
+      { path: "/quotes/:id", element: <OrderDetails /> },
     ],
   },
   {
