@@ -164,6 +164,9 @@ export function OrderDetails() {
       })
       .catch(() => {
         toast.error("Erro ao alterar status");
+      })
+      .finally(() => {
+        setLoadingChangeStatus(false);
       });
   };
 
@@ -180,8 +183,8 @@ export function OrderDetails() {
   const StatusIcon = STATUS_CONFIG[order?.status!].icon;
 
   return (
-    <div className="min-h-screen print:bg-white print:p-0">
-      <div className="mx-auto max-w-5xl space-y-6">
+    <div className="min-h-screen print:bg-white print:p-0 print:text-sm">
+      <div className="mx-auto max-w-5xl space-y-6 print:space-y-4">
         {/* Header - Hidden on print */}
         <div className="flex items-center justify-between print:hidden">
           <div className="flex items-center gap-4">
@@ -268,80 +271,83 @@ export function OrderDetails() {
         </div>
 
         {/* Order Info */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              Informações do {isQuotation ? "Orçamento" : "Pedido"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6 md:grid-cols-2">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Número</p>
-              <p className="font-mono font-semibold text-lg">{order?.code}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Data</p>
-              <p className="font-semibold">
-                {format(order?.createdAt!, "dd/MM/yyyy", { locale: ptBR })}
-              </p>
-            </div>
-            <div className="print:hidden">
-              <p className="text-sm text-muted-foreground mb-1">Status</p>
-              <Badge
-                variant="outline"
-                className={cn("gap-1.5", STATUS_CONFIG[order?.status!].color)}
-              >
-                <StatusIcon className="h-4 w-4" />
-                {STATUS_CONFIG[order?.status!].label}
-              </Badge>
-            </div>
-            {order?.observation && (
-              <div className="md:col-span-2">
-                <p className="text-sm text-muted-foreground mb-1">
-                  Observações
-                </p>
-                <p className="text-sm">{order.observation}</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Customer Info */}
-        {order?.client && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Dados do Cliente</CardTitle>
+        <div className="grid gap-6 print:block print:space-y-2">
+          {/* Order Info */}
+          <Card className="print:shadow-none print:border-none print:mb-2">
+            <CardHeader className="print:hidden">
+              <CardTitle>
+                Informações do {isQuotation ? "Orçamento" : "Pedido"}
+              </CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Nome</p>
-                <p className="font-semibold">{order.client.name}</p>
+            <CardContent className="grid gap-6 md:grid-cols-2 print:flex print:flex-wrap print:gap-x-6 print:items-center print:px-0 print:py-0">
+              <div className="print:flex print:items-center print:gap-2">
+                <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Número:</p>
+                <p className="font-mono font-semibold text-lg print:text-sm">{order?.code}</p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">CPF/CNPJ</p>
-                <p className="font-mono">{order.client.document}</p>
+              <div className="print:flex print:items-center print:gap-2">
+                <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Data:</p>
+                <p className="font-semibold print:text-sm">
+                  {format(order?.createdAt!, "dd/MM/yyyy", { locale: ptBR })}
+                </p>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Telefone</p>
-                <p>{order.client.phone ?? "-"}</p>
+              <div className="print:hidden">
+                <p className="text-sm text-muted-foreground mb-1">Status</p>
+                <Badge
+                  variant="outline"
+                  className={cn("gap-1.5", STATUS_CONFIG[order?.status!].color)}
+                >
+                  <StatusIcon className="h-4 w-4" />
+                  {STATUS_CONFIG[order?.status!].label}
+                </Badge>
               </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Email</p>
-                <p>{order.client.email ?? "-"}</p>
-              </div>
+              {order?.observation && (
+                <div className="md:col-span-2 print:w-full print:mt-1">
+                  <span className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:mr-2">
+                    Observações:
+                  </span>
+                  <span className="text-sm">{order.observation}</span>
+                </div>
+              )}
             </CardContent>
           </Card>
-        )}
+
+          {/* Customer Info */}
+          {order?.client && (
+            <Card className="print:shadow-none print:border-none">
+              <CardHeader className="print:hidden">
+                <CardTitle>Dados do Cliente</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-4 md:grid-cols-2 print:flex print:flex-wrap print:gap-x-6 print:items-center print:px-0 print:py-0">
+                <div className="print:flex print:flex-col print:items-start print:gap-2">
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Nome:</p>
+                  <p className="font-semibold print:text-sm">{order.client.name}</p>
+                </div>
+                <div className="print:flex print:flex-col print:items-start print:gap-2">
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">CPF/CNPJ:</p>
+                  <p className="font-mono print:text-sm">{order.client.document}</p>
+                </div>
+                <div className="print:flex print:flex-col print:items-center print:gap-2">
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Telefone:</p>
+                  <p className="print:text-sm">{order.client.phone ?? "-"}</p>
+                </div>
+                <div className="print:flex print:flex-col print:items-center print:gap-2">
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Email:</p>
+                  <p className="print:text-sm">{order.client.email ?? "-"}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         {/* Order Items */}
-        <Card>
-          <CardHeader>
+        <Card className="print:shadow-none print:border-none">
+          <CardHeader className="print:px-0 print:py-2">
             <CardTitle>
               Itens do {isQuotation ? "Orçamento" : "Pedido"}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
+          <CardContent className="print:px-0 print:py-0">
+            <div className="rounded-md border print:border-none">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -390,11 +396,11 @@ export function OrderDetails() {
         )}*/}
 
         {/* Order Totals */}
-        <Card>
-          <CardHeader>
+        <Card className="print:shadow-none print:border-none print:break-inside-avoid">
+          <CardHeader className="print:px-0 print:py-2">
             <CardTitle>Totais</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-3 print:px-0 print:py-0">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Subtotal dos Itens:</span>
               <span className="font-medium">R$ {order?.finalTotal}</span>
@@ -428,6 +434,15 @@ export function OrderDetails() {
             </div>
           </CardContent>
         </Card>
+
+        <div className="hidden print:block pt-16 break-inside-avoid">
+          <div className="flex justify-center">
+            <div className="w-2/3 border-t border-black pt-2 text-center">
+              <p className="font-medium">{order?.client?.name}</p>
+              <p className="text-sm text-muted-foreground">Assinatura do Cliente</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Status Change Dialog */}
@@ -468,7 +483,9 @@ export function OrderDetails() {
             >
               Cancelar
             </Button>
-            <Button onClick={changeStatus}>Confirmar</Button>
+            <Button onClick={changeStatus} disabled={loadingChangeStatus}>
+              {loadingChangeStatus ? "Alterando..." : "Confirmar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
