@@ -71,6 +71,7 @@ export function ProductLineItem({
     <TableRow>
       <TableCell>
         <AutoCompletePopover
+          className="max-w-[300px]"
           placeholder="Buscar produto..."
           options={products.map((p) => ({ id: p.id, name: p.name }))}
           selectedOption={selectedProductObj}
@@ -84,6 +85,7 @@ export function ProductLineItem({
       </TableCell>
       <TableCell>
         <Input
+
           type="number"
           min="1"
           {...form.register(`items.${index}.quantity`)}

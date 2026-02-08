@@ -22,6 +22,7 @@ export interface ClientRequest {
   phone?: string;
   status?: number;
   address?: AddressPayload | null;
+  ie?: string;
 }
 
 export interface GetClientsRequest {

@@ -64,6 +64,7 @@ export function ClientForm({
       email: "",
       phone: "",
       address: undefined,
+      ie: "",
     },
   });
 
@@ -184,6 +185,14 @@ export function ClientForm({
                 <Input
                   disabled={!isEditMode}
                   {...register("phone", { required: "Telefone obrigatório" })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Inscrição Estadual</Label>
+                <Input
+                  disabled={!isEditMode}
+                  {...register("ie")}
                 />
               </div>
             </div>

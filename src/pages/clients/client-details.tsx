@@ -74,7 +74,7 @@ export default function ClientDetails() {
       )}
       <div className="mt-2 flex justify-end gap-2">
         <Button variant={"outline"} className="xs:w-full md:w-auto" asChild>
-          <NavLink to={`/clients/${clientData?.id}`}>Editar</NavLink>
+          <NavLink to={`/clients/${clientData?.id}/edit`}>Editar</NavLink>
         </Button>
         {user?.role === RoleEnum.AMDMIN && (
           <AlertDialog>

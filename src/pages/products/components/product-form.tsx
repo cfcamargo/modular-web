@@ -26,10 +26,14 @@ import {
 import { ProductRequest } from "@/models/requests/product-request";
 import { ProductResponse } from "@/models/responses/product-response";
 
-const productSchema = z.object({
+export const productSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
 
   price: z.coerce
+    .number({ invalid_type_error: "Informe um valor numérico" })
+    .min(0.01, "O preço deve ser maior que zero."),
+
+  installmentPrice: z.coerce
     .number({ invalid_type_error: "Informe um valor numérico" })
     .min(0.01, "O preço deve ser maior que zero."),
 
@@ -45,14 +49,15 @@ const productSchema = z.object({
   description: z.string().optional(),
 });
 
-type ProductFormSchema = z.infer<typeof productSchema>;
+export type ProductFormSchema = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
-  initialData?: ProductResponse;
+  initialData?: ProductFormSchema;
   onSubmit: (data: ProductRequest) => Promise<void>;
   isLoading: boolean;
   pageTitle: string;
   isEditMode?: boolean;
+  isEditScreen?: boolean
 }
 
 export default function ProductForm({
@@ -61,6 +66,7 @@ export default function ProductForm({
   isLoading,
   pageTitle,
   isEditMode = true,
+  isEditScreen = false
 }: ProductFormProps) {
   const navigate = useNavigate();
 
@@ -74,13 +80,16 @@ export default function ProductForm({
     defaultValues: initialData || {
       name: "",
       price: "" as unknown as number,
+      installmentPrice: "" as unknown as number,
       initialStock: "" as unknown as number,
       description: "",
       unit: "",
     },
   });
+  
 
   const handleFormSubmit = (data: ProductFormSchema) => {
+    console.log(data);
     onSubmit(data as ProductRequest);
   };
 
@@ -134,7 +143,7 @@ export default function ProductForm({
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label>Preço (R$) *</Label>
+                <Label>Preço a vista (R$) *</Label>
                 <Input
                   disabled={!isEditMode}
                   type="number"
@@ -145,6 +154,22 @@ export default function ProductForm({
                 {errors.price && (
                   <p className="text-destructive text-sm">
                     {errors.price.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Preço a prazo (R$) *</Label>
+                <Input
+                  disabled={!isEditMode}
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  {...register("installmentPrice")}
+                />
+                {errors.installmentPrice && (
+                  <p className="text-destructive text-sm">
+                    {errors.installmentPrice.message}
                   </p>
                 )}
               </div>
@@ -171,13 +196,14 @@ export default function ProductForm({
                 <Controller
                   control={control}
                   name="unit"
+                  disabled={isEditScreen}
                   render={({ field }) => (
                     <Select
                       disabled={!isEditMode}
                       onValueChange={field.onChange}
                       value={field.value}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger disabled={isEditScreen}>
                         <SelectValue placeholder="Selecione..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -207,6 +233,10 @@ export default function ProductForm({
             </div>
           </CardContent>
         </Card>
+
+        <div>
+          {JSON.stringify(initialData)}
+        </div>
 
         {isEditMode && (
           <div className="flex justify-end gap-4">

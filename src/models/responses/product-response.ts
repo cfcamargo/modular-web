@@ -7,6 +7,7 @@ export interface ProductResponse {
   description: string;
   status: number;
   price: number;
+  installmentPrice: number;
   stockOnHand: number;
   createdAt: string;
   updatedAt: string;

@@ -72,6 +72,11 @@ const STATUS_CONFIG = {
     color: "bg-red-100 text-red-800 border-red-300",
     icon: X,
   },
+  [OrderStatusEnum.PENDING]: {
+    label: "Pendente",
+    color: "bg-orange-100 text-orange-800 border-orange-300",
+    icon: X,
+  },
 } as const;
 
 export function OrderDetails() {
@@ -92,10 +97,23 @@ export function OrderDetails() {
 
   const { id } = useParams();
 
-  const handleGenerateOrder = () => {
-    setOrder({ ...order, status: "pendente" });
-    setShowGenerateOrderDialog(false);
-    toast.success("Pedido gerado com sucesso!");
+  const handleGenerateOrder = async () => {
+    if (!order) return;
+    await orderApi
+      .changeStatus({
+        id: order.id,
+        status: OrderStatusEnum.PENDING,
+      })
+      .then(() => {
+        toast.success("Pedido gerado com sucesso!");
+        getOrderDetails();
+      })
+      .catch(() => {
+        toast.error("Erro ao gerar pedido");
+      })
+      .finally(() => {
+        setShowGenerateOrderDialog(false);
+      });
   };
 
   const handlePrint = () => {
@@ -131,11 +149,12 @@ export function OrderDetails() {
   };
 
   const changeStatus = async () => {
+    if (!order || !selectedStatus) return;
     setLoadingChangeStatus(true);
 
     await orderApi
       .changeStatus({
-        id: order?.id!,
+        id: order.id,
         status: selectedStatus!,
       })
       .then(() => {
@@ -237,7 +256,7 @@ export function OrderDetails() {
               </Button>
             )}
             {order?.status !== OrderStatusEnum.CANCELED &&
-              order?.status !== OrderStatusEnum.CONFIRMED && (
+              order?.status !== OrderStatusEnum.CONFIRMED && !isQuotation && (
                 <Button
                   variant="outline"
                   onClick={() => setShowStatusDialog(true)}

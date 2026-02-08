@@ -254,6 +254,7 @@ export default function ProductionOrders() {
         quantity: data.quantity,
       })
       .then((resp) => {
+        console.log(resp);
         toast.success("Ordem criada com sucesso!");
         setDialogOpen(false);
         form.reset();
@@ -409,7 +410,7 @@ export default function ProductionOrders() {
                     </p>
                   )}
                   {selectedProduct && (
-                    <div className="flex items-center justify-between p-2 border rounded-md bg-slate-50">
+                    <div className="flex items-center justify-between p-2 border rounded-md">
                       <span className="text-sm font-medium">
                         {selectedProduct.name}
                       </span>

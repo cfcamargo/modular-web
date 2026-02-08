@@ -1,7 +1,6 @@
 import { Helmet } from "react-helmet-async";
 import { ClientForm } from "./components/client-form";
 import { useCallback, useEffect, useState } from "react";
-import { ClientRequest } from "@/models/requests/client-request";
 import { clientApi } from "@/api";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -35,10 +34,11 @@ export default function ClientEdit() {
     handleGetDetails();
   }, []);
 
-  const handleCreate = async (data: ClientRequest) => {
+  const handleCreate = async (data: ClientResponse) => {
     setSubmitLoading(true);
+    const { id, createdAt, updatedAt, ...rest } = data;
     await clientApi
-      .update(data, id!)
+      .update(rest, id!)
       .then(() => {
         toast.success("Cliente atualizado com sucesso!");
         navigate(`/clients/${clientData?.id}`);

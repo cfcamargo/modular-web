@@ -74,12 +74,15 @@ export default function EditProduct() {
           isLoading={false}
           onSubmit={handleCreate}
           isEditMode={false}
-          initialData={product}
+          initialData={{
+            ...product,
+            initialStock: product.stockOnHand,
+          }}
         />
       )}
       <div className="mt-2 flex justify-end gap-2">
         <Button variant={"outline"} className="xs:w-full md:w-auto" asChild>
-          <NavLink to={`/products/${product?.id}`}>Editar</NavLink>
+          <NavLink to={`/products/${product?.id}/edit`}>Editar</NavLink>
         </Button>
         {user?.role === RoleEnum.AMDMIN && (
           <AlertDialog>

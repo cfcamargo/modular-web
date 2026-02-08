@@ -20,4 +20,8 @@ export interface ClientResponse {
   phone?: string;
   status?: number;
   address?: AddressResponse;
+  ie?: string;
+  createdAt?: string;
+  updatedAt?: string;
+
 }

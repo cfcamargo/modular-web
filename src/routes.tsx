@@ -24,6 +24,7 @@ import ClientEdit from "./pages/clients/client-edit";
 import ProductionOrders from "./pages/production/production-orders";
 import Quotes from "./pages/quote/quotes";
 import { OrderDetails } from "./pages/quote/quote-details";
+import EditProduct from "./pages/products/edit-product";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -58,6 +59,7 @@ export const router = createBrowserRouter([
       { path: "/products", element: <Products /> },
       { path: "/products/create", element: <NewProduct /> },
       { path: "/products/:id", element: <DetailsProduct /> },
+      { path: "/products/:id/edit", element: <EditProduct /> },
       { path: "/production", element: <ProductionOrders /> },
       { path: "/users", element: <UserList /> },
       { path: "/users/create", element: <CreateUser /> },
