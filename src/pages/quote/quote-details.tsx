@@ -118,7 +118,6 @@ export function OrderDetails() {
 
   const handlePrint = () => {
     window.print();
-    toast.success("Abrindo visualização de impressão...");
   };
 
   const handleCancelOrder = async () => {
@@ -183,7 +182,7 @@ export function OrderDetails() {
   const StatusIcon = STATUS_CONFIG[order?.status!].icon;
 
   return (
-    <div className="min-h-screen print:bg-white print:p-0 print:text-sm">
+    <div className="min-h-screen print:bg-white print:text-black print:p-0 print:text-sm">
       <div className="mx-auto max-w-5xl space-y-6 print:space-y-4">
         {/* Header - Hidden on print */}
         <div className="flex items-center justify-between print:hidden">
@@ -243,7 +242,7 @@ export function OrderDetails() {
           <Badge
             variant="outline"
             className={cn(
-              "gap-2 text-base px-4 py-2",
+              "gap-2 text-base px-4 py-2 print:bg-white print:text-black print:border-black",
               STATUS_CONFIG[order?.status!].color,
             )}
           >
@@ -273,7 +272,7 @@ export function OrderDetails() {
         {/* Order Info */}
         <div className="grid gap-6 print:block print:space-y-2">
           {/* Order Info */}
-          <Card className="print:shadow-none print:border-none print:mb-2">
+          <Card className="print:shadow-none print:bg-white print:border-none print:mb-2">
             <CardHeader className="print:hidden">
               <CardTitle>
                 Informações do {isQuotation ? "Orçamento" : "Pedido"}
@@ -281,11 +280,11 @@ export function OrderDetails() {
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2 print:flex print:flex-wrap print:gap-x-6 print:items-center print:px-0 print:py-0">
               <div className="print:flex print:items-center print:gap-2">
-                <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Número:</p>
+                <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:text-black">Número:</p>
                 <p className="font-mono font-semibold text-lg print:text-sm">{order?.code}</p>
               </div>
               <div className="print:flex print:items-center print:gap-2">
-                <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Data:</p>
+                <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:text-black">Data:</p>
                 <p className="font-semibold print:text-sm">
                   {format(order?.createdAt!, "dd/MM/yyyy", { locale: ptBR })}
                 </p>
@@ -294,7 +293,7 @@ export function OrderDetails() {
                 <p className="text-sm text-muted-foreground mb-1">Status</p>
                 <Badge
                   variant="outline"
-                  className={cn("gap-1.5", STATUS_CONFIG[order?.status!].color)}
+                  className={cn("gap-1.5 print:bg-white print:text-black print:border-black", STATUS_CONFIG[order?.status!].color)}
                 >
                   <StatusIcon className="h-4 w-4" />
                   {STATUS_CONFIG[order?.status!].label}
@@ -313,25 +312,25 @@ export function OrderDetails() {
 
           {/* Customer Info */}
           {order?.client && (
-            <Card className="print:shadow-none print:border-none">
+            <Card className="print:shadow-none print:bg-white print:border-none">
               <CardHeader className="print:hidden">
                 <CardTitle>Dados do Cliente</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2 print:flex print:flex-wrap print:gap-x-6 print:items-center print:px-0 print:py-0">
                 <div className="print:flex print:flex-col print:items-start print:gap-2">
-                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Nome:</p>
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:text-black">Nome:</p>
                   <p className="font-semibold print:text-sm">{order.client.name}</p>
                 </div>
                 <div className="print:flex print:flex-col print:items-start print:gap-2">
-                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">CPF/CNPJ:</p>
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:text-black">CPF/CNPJ:</p>
                   <p className="font-mono print:text-sm">{order.client.document}</p>
                 </div>
-                <div className="print:flex print:flex-col print:items-center print:gap-2">
-                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Telefone:</p>
+                <div className="print:flex print:flex-col print:items-start print:gap-2">
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:text-black">Telefone:</p>
                   <p className="print:text-sm">{order.client.phone ?? "-"}</p>
                 </div>
-                <div className="print:flex print:flex-col print:items-center print:gap-2">
-                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold">Email:</p>
+                <div className="print:flex print:flex-col print:items-start print:gap-2">
+                  <p className="text-sm text-muted-foreground mb-1 print:mb-0 print:font-semibold print:text-black">Email:</p>
                   <p className="print:text-sm">{order.client.email ?? "-"}</p>
                 </div>
               </CardContent>
@@ -340,7 +339,7 @@ export function OrderDetails() {
         </div>
 
         {/* Order Items */}
-        <Card className="print:shadow-none print:border-none">
+        <Card className="print:shadow-none print:bg-white print:border-none">
           <CardHeader className="print:px-0 print:py-2">
             <CardTitle>
               Itens do {isQuotation ? "Orçamento" : "Pedido"}
@@ -396,30 +395,30 @@ export function OrderDetails() {
         )}*/}
 
         {/* Order Totals */}
-        <Card className="print:shadow-none print:border-none print:break-inside-avoid">
+        <Card className="print:shadow-none print:bg-white print:border-none print:break-inside-avoid">
           <CardHeader className="print:px-0 print:py-2">
             <CardTitle>Totais</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 print:px-0 print:py-0">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Subtotal dos Itens:</span>
-              <span className="font-medium">R$ {order?.finalTotal}</span>
+              <span className="text-muted-foreground print:text-black">Subtotal dos Itens:</span>
+              <span className="font-medium">R$ {Number(order?.finalTotal).toFixed(2)}</span>
             </div>
 
-            {order?.shippingCost! > 0 && (
+            {Number(order?.shippingCost) > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Frete:</span>
+                <span className="text-muted-foreground print:text-black">Frete:</span>
                 <span className="font-medium text-blue-600">
-                  + R$ {order?.shippingCost.toFixed(2)}
+                  + R$ {Number(order?.shippingCost).toFixed(2)}
                 </span>
               </div>
             )}
 
-            {order?.totalDiscount! > 0 && (
+            {Number(order?.totalDiscount) > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Desconto:</span>
+                <span className="text-muted-foreground print:text-black">Desconto:</span>
                 <span className="font-medium text-green-600">
-                  - R$ {order?.totalDiscount!.toFixed(2)}
+                  - R$ {Number(order?.totalDiscount).toFixed(2)}
                 </span>
               </div>
             )}
@@ -429,7 +428,7 @@ export function OrderDetails() {
             <div className="flex items-center justify-between">
               <span className="text-xl font-bold">TOTAL:</span>
               <span className="text-2xl font-bold text-primary">
-                R$ {order?.finalTotal}
+                R$ {Number(order?.finalTotal).toFixed(2)}
               </span>
             </div>
           </CardContent>

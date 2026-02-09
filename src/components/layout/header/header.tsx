@@ -10,7 +10,7 @@ export default function Header() {
           <img src="/logo.jpg" alt="" className="h-full w-full" />
         </div>
         <span className="absolute text-red-600 z-10 -right-1 -bottom-1 px-1 bg-white rounded-lg border-red-600 border-1 text-xs shadow-md">
-          v0.1
+          v1.0
         </span>
       </div>
 
