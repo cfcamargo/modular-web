@@ -234,10 +234,6 @@ export default function ProductForm({
           </CardContent>
         </Card>
 
-        <div>
-          {JSON.stringify(initialData)}
-        </div>
-
         {isEditMode && (
           <div className="flex justify-end gap-4">
             <Button

@@ -402,7 +402,9 @@ export function OrderDetails() {
           <CardContent className="space-y-3 print:px-0 print:py-0">
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground print:text-black">Subtotal dos Itens:</span>
-              <span className="font-medium">R$ {Number(order?.finalTotal).toFixed(2)}</span>
+              <span className="font-medium">
+                R$ {Number(Number(order?.finalTotal ?? 0) - Number(order?.shippingCost ?? 0)).toFixed(2)}
+              </span>
             </div>
 
             {Number(order?.shippingCost) > 0 && (
