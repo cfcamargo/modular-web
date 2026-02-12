@@ -428,11 +428,28 @@ export function OrderDetails() {
             <Separator />
 
             <div className="flex items-center justify-between">
-              <span className="text-xl font-bold">TOTAL:</span>
+              <span className="text-xl font-bold">TOTAL A VISTA:</span>
               <span className="text-2xl font-bold text-primary">
                 R$ {Number(order?.finalTotal).toFixed(2)}
               </span>
             </div>
+
+            {isQuotation && (
+               <div className="flex items-center justify-between pt-2">
+                 <span className="text-sm text-muted-foreground">Valor a prazo:</span>
+                 <span className="text-sm font-medium">
+                   R${" "}
+                   {order?.items
+                     .reduce((acc, item) => {
+                       return (
+                         acc +
+                         Number(item.quantity) * Number(item.product.installmentPrice)
+                       );
+                     }, 0)
+                     .toFixed(2)}
+                 </span>
+               </div>
+             )}
           </CardContent>
         </Card>
 

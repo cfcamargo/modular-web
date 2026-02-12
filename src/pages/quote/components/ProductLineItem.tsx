@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,6 @@ export function ProductLineItem({
 
   const quantity = form.watch(`items.${index}.quantity`) || 0;
   const unitPrice = form.watch(`items.${index}.unitPrice`) || 0;
-  const productId = form.watch(`items.${index}.productId`);
 
   const subtotal = quantity * unitPrice;
 
@@ -58,11 +57,13 @@ export function ProductLineItem({
       form.setValue(`items.${index}.productId`, option.id);
       if (product) {
         form.setValue(`items.${index}.unitPrice`, product.price);
+        form.setValue(`items.${index}.installmentPrice`, product.installmentPrice);
         setSelectedProductObj({ id: product.id, name: product.name });
       }
     } else {
       form.setValue(`items.${index}.productId`, "");
       form.setValue(`items.${index}.unitPrice`, 0);
+      form.setValue(`items.${index}.installmentPrice`, 0);
       setSelectedProductObj(null);
     }
   };
@@ -98,6 +99,15 @@ export function ProductLineItem({
           step="0.01"
           min="0"
           {...form.register(`items.${index}.unitPrice`)}
+          className="h-9"
+        />
+      </TableCell>
+      <TableCell>
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          {...form.register(`items.${index}.installmentPrice`)}
           className="h-9"
         />
       </TableCell>

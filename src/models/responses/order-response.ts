@@ -29,6 +29,7 @@ export interface OrderItem {
     unit: string;
     description: string;
     status: number;
+    installmentPrice: string;
   };
   quantity: number;
   deliveredQuantity: number;

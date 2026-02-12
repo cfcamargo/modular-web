@@ -35,11 +35,21 @@ import { ProductLineItem } from "./components/ProductLineItem";
 import { useUserLoggedStore } from "@/store/auth/user-logged";
 import { useNavigate } from "react-router-dom";
 import { OrderStatusEnum } from "@/utils/enums/OrderStatusEnum";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const orderItemSchema = z.object({
   productId: z.string().min(1, "Selecione um produto"),
   quantity: z.coerce.number().min(1, "Quantidade mínima é 1"),
   unitPrice: z.coerce.number().min(0.01, "Preço deve ser maior que 0"),
+  installmentPrice: z.coerce.number().min(0.01, "Preço a prazo deve ser maior que 0"),
 });
 
 const salesOrderSchema = z.object({
@@ -58,7 +68,7 @@ export default function NewQuote() {
     resolver: zodResolver(salesOrderSchema),
     defaultValues: {
       customerId: "",
-      items: [{ productId: "", quantity: 1, unitPrice: 0 }],
+      items: [{ productId: "", quantity: 1, unitPrice: 0, installmentPrice: 0 }],
       includeDelivery: false,
       shippingCost: 0,
       discount: 0,
@@ -69,6 +79,8 @@ export default function NewQuote() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"SPOT" | "INSTALLMENT">("SPOT");
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -92,6 +104,26 @@ export default function NewQuote() {
     data: SalesOrderFormData,
     status: "draft" | "order",
   ) => {
+    // Determine the price based on status and payment method
+    // If it's a draft, we might want to keep the unitPrice as is or logic might differ?
+    // For now, if it's an order, we check paymentMethod.
+    // However, the requirement says "se ele clicar em gerar pedido...".
+    // So for draft, we probably just save as is. But wait, the schema has both.
+    // The payload to createOrder expects 'price'.
+    
+    // We should map items to set the correct 'price'
+    const itemsPayload = watchItems.map((item) => {
+      let finalPrice = Number(item.unitPrice);
+      if (status === "order" && paymentMethod === "INSTALLMENT") {
+        finalPrice = Number(item.installmentPrice);
+      }
+      return {
+        productId: item.productId,
+        quantity: Number(item.quantity),
+        price: finalPrice,
+      };
+    });
+
     const payload = {
       clientId: selectedClient?.id,
       userId: user?.id,
@@ -101,11 +133,7 @@ export default function NewQuote() {
       totalDiscount: data.discount,
       status:
         status === "draft" ? OrderStatusEnum.DRAFT : OrderStatusEnum.CONFIRMED,
-      items: watchItems.map((item) => ({
-        productId: item.productId,
-        quantity: Number(item.quantity),
-        price: Number(item.unitPrice),
-      })),
+      items: itemsPayload,
     };
     setLoading(true);
 
@@ -124,7 +152,16 @@ export default function NewQuote() {
       })
       .finally(() => {
         setLoading(false);
+        setShowPaymentMethodDialog(false);
       });
+  };
+
+  const handleGenerateOrderClick = () => {
+    setShowPaymentMethodDialog(true);
+  };
+
+  const confirmGenerateOrder = () => {
+    form.handleSubmit((data) => onSubmit(data, "order"))();
   };
 
   const [clients, setClients] = useState<ClientResponse[]>([]);
@@ -213,6 +250,7 @@ export default function NewQuote() {
                             <TableHead>Produto</TableHead>
                             <TableHead className="w-24">Qtd</TableHead>
                             <TableHead className="w-32">Valor Unit.</TableHead>
+                            <TableHead className="w-32">Valor a Prazo</TableHead>
                             <TableHead className="w-32">Subtotal</TableHead>
                             <TableHead className="w-12"></TableHead>
                           </TableRow>
@@ -236,7 +274,7 @@ export default function NewQuote() {
                       disabled={loading}
                       size="sm"
                       onClick={() =>
-                        append({ productId: "", quantity: 1, unitPrice: 0 })
+                        append({ productId: "", quantity: 1, unitPrice: 0, installmentPrice: 0 })
                       }
                     >
                       <Plus className="mr-2 h-4 w-4" />
@@ -391,9 +429,7 @@ export default function NewQuote() {
                     <Button
                       type="button"
                       className="w-full"
-                      onClick={form.handleSubmit((data) =>
-                        onSubmit(data, "order"),
-                      )}
+                      onClick={handleGenerateOrderClick}
                       disabled={loading}
                     >
                       <ShoppingCart className="mr-2 h-4 w-4" />
@@ -406,6 +442,42 @@ export default function NewQuote() {
           </form>
         </div>
       </FormProvider>
+
+      <Dialog open={showPaymentMethodDialog} onOpenChange={setShowPaymentMethodDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Gerar Pedido</DialogTitle>
+            <DialogDescription>
+              Selecione a forma de pagamento para este pedido.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <RadioGroup
+              value={paymentMethod}
+              onValueChange={(value) => setPaymentMethod(value as "SPOT" | "INSTALLMENT")}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="SPOT" id="spot" />
+                <Label htmlFor="spot">À Vista (Usa Valor Unitário)</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="INSTALLMENT" id="installment" />
+                <Label htmlFor="installment">A Prazo (Usa Valor a Prazo)</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPaymentMethodDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={confirmGenerateOrder} disabled={loading}>
+              {loading ? "Gerando..." : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
