@@ -16,7 +16,7 @@ export interface AddressPayload {
 export interface ClientRequest {
   id?: string;
   name: string;
-  document: string;
+  document?: string;
   type?: SupplierType;
   email?: string;
   phone?: string;

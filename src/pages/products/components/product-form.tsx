@@ -210,6 +210,8 @@ export default function ProductForm({
                         <SelectItem value="UN">Unidade (UN)</SelectItem>
                         <SelectItem value="KG">Quilograma (KG)</SelectItem>
                         <SelectItem value="M2">Metro Quadrado (M²)</SelectItem>
+                        <SelectItem value="KM">Quilômetro (KM)</SelectItem>
+                        <SelectItem value="HR">Hora</SelectItem>
                       </SelectContent>
                     </Select>
                   )}

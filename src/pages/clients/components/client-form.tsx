@@ -155,9 +155,7 @@ export function ClientForm({
                 <Label>{personType === "PF" ? "CPF" : "CNPJ"} *</Label>
                 <Input
                   disabled={!isEditMode}
-                  {...register("document", {
-                    required: "Documento obrigatório",
-                  })}
+                  {...register("document")}
                 />
                 {errors.document && (
                   <p className="text-destructive text-sm">
@@ -171,7 +169,7 @@ export function ClientForm({
                 <Input
                   disabled={!isEditMode}
                   type="email"
-                  {...register("email", { required: "Email obrigatório" })}
+                  {...register("email")}
                 />
                 {errors.email && (
                   <p className="text-destructive text-sm">
@@ -186,6 +184,11 @@ export function ClientForm({
                   disabled={!isEditMode}
                   {...register("phone", { required: "Telefone obrigatório" })}
                 />
+                {errors.phone && (
+                  <p className="text-destructive text-sm">
+                    {errors.phone.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
