@@ -181,6 +181,19 @@ export function OrderDetails() {
 
   const StatusIcon = STATUS_CONFIG[order?.status!].icon;
 
+  // Calculations
+  const itemsSubtotal =
+    order?.items.reduce((acc, item) => acc + Number(item.subtotal), 0) ?? 0;
+  const shipping = Number(order?.shippingCost ?? 0);
+  const discount = Number(order?.totalDiscount ?? 0);
+  const totalCash = itemsSubtotal + shipping - discount;
+  const totalInstallment =
+    (order?.items.reduce(
+      (acc, item) =>
+        acc + Number(item.quantity) * Number(item.product.installmentPrice),
+      0,
+    ) ?? 0) + shipping;
+
   return (
     <div className="min-h-screen print:bg-white print:text-black print:p-0 print:text-sm">
       <div className="mx-auto max-w-5xl space-y-6 print:space-y-4">
@@ -401,24 +414,39 @@ export function OrderDetails() {
           </CardHeader>
           <CardContent className="space-y-3 print:px-0 print:py-0">
             <div className="flex items-center justify-between">
-              <span className="text-muted-foreground print:text-black">Subtotal dos Itens:</span>
+              <span className="text-muted-foreground print:text-black">
+                Subtotal dos Itens:
+              </span>
               <span className="font-medium">
-                R$ {Number(Number(order?.finalTotal ?? 0) - Number(order?.shippingCost ?? 0)).toFixed(2)}
+                R$ {itemsSubtotal.toFixed(2)}
               </span>
             </div>
 
             {Number(order?.shippingCost) > 0 && (
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground print:text-black">Frete:</span>
+                <span className="text-muted-foreground print:text-black">
+                  Frete:
+                </span>
                 <span className="font-medium text-blue-600">
                   + R$ {Number(order?.shippingCost).toFixed(2)}
                 </span>
               </div>
             )}
 
+            <div className="flex items-center justify-between border-t py-2">
+              <span className="font-medium print:text-black">
+                Total (Itens + Frete):
+              </span>
+              <span className="font-medium">
+                R$ {(itemsSubtotal + shipping).toFixed(2)}
+              </span>
+            </div>
+
             {Number(order?.totalDiscount) > 0 && (
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground print:text-black">Desconto:</span>
+              <div className="flex items-center justify-between pb-2">
+                <span className="text-muted-foreground print:text-black">
+                  Desconto À Vista:
+                </span>
                 <span className="font-medium text-green-600">
                   - R$ {Number(order?.totalDiscount).toFixed(2)}
                 </span>
@@ -427,10 +455,10 @@ export function OrderDetails() {
 
             <Separator />
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-2">
               <span className="text-xl font-bold">TOTAL A VISTA:</span>
               <span className="text-2xl font-bold text-primary">
-                R$ {Number(order?.finalTotal).toFixed(2)}
+                R$ {totalCash.toFixed(2)}
               </span>
             </div>
 
@@ -438,15 +466,7 @@ export function OrderDetails() {
                <div className="flex items-center justify-between pt-2">
                  <span className="text-sm text-muted-foreground">Valor a prazo:</span>
                  <span className="text-sm font-medium">
-                   R${" "}
-                   {order?.items
-                     .reduce((acc, item) => {
-                       return (
-                         acc +
-                         Number(item.quantity) * Number(item.product.installmentPrice)
-                       );
-                     }, 0)
-                     .toFixed(2)}
+                   R$ {totalInstallment.toFixed(2)}
                  </span>
                </div>
              )}
