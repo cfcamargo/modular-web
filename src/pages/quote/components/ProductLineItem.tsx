@@ -28,10 +28,17 @@ export function ProductLineItem({
 
   const subtotal = quantity * unitPrice;
 
+  const productName = form.getValues(`items.${index}.productName`);
+  const productId = form.watch(`items.${index}.productId`);
+
   const [selectedProductObj, setSelectedProductObj] = useState<{
     id: string;
     name: string;
-  } | null>(null);
+  } | null>(
+    productId && productName
+      ? { id: productId, name: productName }
+      : null,
+  );
 
   const handleSearchProduct = async (term: string) => {
     setLoading(true);
@@ -79,9 +86,7 @@ export function ProductLineItem({
           onSelect={handleSelect}
           loading={loading}
           handleChangeSearchTerm={(term) => handleSearchProduct(term)}
-          onFocus={() => {
-            if (products.length === 0) handleSearchProduct("");
-          }}
+
         />
       </TableCell>
       <TableCell>

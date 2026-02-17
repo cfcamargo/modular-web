@@ -7,6 +7,7 @@ import {
   Package,
   FileText,
   X,
+  Copy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -127,6 +128,28 @@ export function OrderDetails() {
       navigate("/quotes");
     });
   };
+  const handleClone = () => {
+    if (!order) return;
+
+    // Re-mapping to match NewQuote expected state
+    const state = {
+      items: order.items.map((item) => ({
+        productId: item.productId,
+        productName: item.product.name,
+        quantity: Number(item.quantity),
+        unitPrice: Number(item.price),
+        installmentPrice: Number(item.product.installmentPrice),
+      })),
+      shippingCost: Number(order.shippingCost),
+      // User said: "trazer os items, e frete". Did not mention discount explicitly, but "mesmos items e tal".
+      // Let's safe bet: clone discount too if available?
+      // "nao precisa trazer o cliente".
+      // Let's include discount as it's part of values.
+      discount: Number(order.totalDiscount),
+    };
+
+    navigate("/quotes/create", { state });
+  };
 
   const navigate = useNavigate();
 
@@ -179,7 +202,11 @@ export function OrderDetails() {
     return <OrderFormSkeleton />;
   }
 
-  const StatusIcon = STATUS_CONFIG[order?.status!].icon;
+  if (!order) {
+     return <div>Pedido não encontrado</div>;
+  }
+
+  const StatusIcon = STATUS_CONFIG[order.status].icon;
 
   // Calculations
   const itemsSubtotal =
@@ -214,6 +241,10 @@ export function OrderDetails() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={handleClone}>
+              <Copy className="mr-2 h-4 w-4" />
+              Clonar
+            </Button>
             <Button variant="outline" onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
               Imprimir

@@ -33,7 +33,7 @@ import { AutoCompletePopover } from "@/components/shared/auto-complete-popover";
 import { BaseOption } from "@/models/common/baseOption";
 import { ProductLineItem } from "./components/ProductLineItem";
 import { useUserLoggedStore } from "@/store/auth/user-logged";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { OrderStatusEnum } from "@/utils/enums/OrderStatusEnum";
 import {
   Dialog,
@@ -76,7 +76,25 @@ export default function NewQuote() {
   });
 
   const { user } = useUserLoggedStore();
+
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state) {
+      const state = location.state as any;
+      form.reset({
+        customerId: "",
+        items: state.items || [
+          { productId: "", quantity: 1, unitPrice: 0, installmentPrice: 0 },
+        ],
+        includeDelivery: !!state.shippingCost,
+        deliveryAddress: state.deliveryAddress || "",
+        shippingCost: state.shippingCost || 0,
+        discount: state.discount || 0,
+      });
+    }
+  }, [location.state, form]);
 
   const [loading, setLoading] = useState(false);
   const [showPaymentMethodDialog, setShowPaymentMethodDialog] = useState(false);
