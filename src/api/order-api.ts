@@ -3,7 +3,6 @@ import {
   CreateOrderRequest,
   GetOrdersRequest,
 } from "@/models/requests/order-request";
-import { MetaProps } from "@/models/responses/meta-response";
 import {
   OrderDetailsResponse,
   OrderResponse,
@@ -28,9 +27,12 @@ export class OrderApi {
     request: GetOrdersRequest,
   ): Promise<{
     data: {
-      orders: OrderResponse[];
+      data: OrderResponse[];
       counters: OrderCountersProps;
-      meta: MetaProps;
+      total: number;
+      page: number;
+      perPage: number;
+      lastPage: number;
     };
   }> => {
     return api.get(baseURL, { params: request });

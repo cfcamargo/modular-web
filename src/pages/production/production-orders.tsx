@@ -69,7 +69,9 @@ import { productApi, productionApi } from "@/api";
 import { PaginationEnum } from "@/utils/enums/PaginationEnum";
 import { ProductionStatusEnum } from "@/utils/enums/ProductionStatusEnum";
 import { ProductResponse } from "@/models/responses/product-response";
+import { MetaProps } from "@/models/responses/meta-response";
 import { InputAutoComplete } from "@/components/shared/input-auto-complete";
+import Pagination from "@/components/shared/pagination";
 
 // --- CONFIGURAÇÕES E UTILS ---
 
@@ -227,9 +229,11 @@ function OrderActions({ order, onUpdateStatus }: OrderActionsProps) {
 
 export default function ProductionOrders() {
   const [orders, setOrders] = useState<ProductionResponse[]>([]);
+  const [meta, setMeta] = useState<MetaProps | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState<FilterStatusType>("all");
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
   const [products, setProducts] = useState<ProductResponse[]>([]);
   const [productSearchTerm, setProductSearchTheme] = useState("");
@@ -301,20 +305,33 @@ export default function ProductionOrders() {
   };
 
   const getProductionOrders = useCallback(
-    async (page = 1, searchTerm: string = "", status?: FilterStatusType) => {
+    async (pageIndex = 1, searchTerm: string = "", status?: FilterStatusType) => {
+      setLoading(true);
       await productionApi
         .listAll({
-          page,
+          page: pageIndex,
           perPage: PaginationEnum.PER_PAGE20,
           searchTerm,
           status: status ? getStatusEnum(status) : null,
         })
         .then((resp) => {
-          setOrders(resp.data.orders);
+          const resData = resp.data as any;
+          setOrders(resData?.orders || resData?.data || []);
+          
+          setMeta({
+            page: Number(resData?.page || resData?.meta?.page || 1),
+            perPage: Number(resData?.perPage || resData?.meta?.perPage || 20),
+            total: resData?.total || resData?.meta?.total || 0,
+            lastPage: resData?.lastPage || resData?.meta?.lastPage || 1,
+          });
         })
         .catch(() => {
           toast.error("Erro ao buscar ordens");
           setOrders([]);
+          setMeta(null);
+        })
+        .finally(() => {
+          setLoading(false);
         });
     },
     []
@@ -353,8 +370,8 @@ export default function ProductionOrders() {
   }, [productSearchTerm]);
 
   useEffect(() => {
-    getProductionOrders();
-  }, []);
+    getProductionOrders(page, "", filterStatus);
+  }, [page]);
 
   return (
     <div className="space-y-6 pb-20 md:pb-0">
@@ -507,7 +524,7 @@ export default function ProductionOrders() {
           </SelectContent>
         </Select>
         <div className="xs:hidden md:block ml-auto text-sm text-muted-foreground">
-          {orders.length} registro(s)
+          {meta?.total || 0} registro(s)
         </div>
       </div>
 
@@ -664,6 +681,16 @@ export default function ProductionOrders() {
           </TableBody>
         </Table>
       </div>
+
+      {meta && orders.length > 0 && (
+        <Pagination
+          pageIndex={meta.page}
+          totalCount={meta.total}
+          perPage={meta.perPage}
+          meta={meta}
+          getData={(newPage) => setPage(newPage)}
+        />
+      )}
     </div>
   );
 }

@@ -121,12 +121,24 @@ export default function Quotes() {
 
       const response = await orderApi.findAll(payload);
 
-      setOrders(response.data.orders);
-      setTotalRecords(response.data.meta.total);
-      setMeta(response.data.meta);
-      setCounters(response.data.counters);
+      console.log('Orders API response:', response.data);
+
+      const resData = response.data;
+
+      setOrders(resData?.data || []);
+      setTotalRecords(resData?.total || 0);
+      setMeta({
+        page: Number(resData?.page) || 1,
+        perPage: Number(resData?.perPage) || 10,
+        total: resData?.total || 0,
+        lastPage: resData?.lastPage || 1,
+      });
+      setCounters(resData?.counters || null);
     } catch (error) {
       console.error("Erro ao carregar pedidos:", error);
+      setOrders([]);
+      setTotalRecords(0);
+      setMeta(null);
     } finally {
       setLoading(false);
     }
@@ -154,11 +166,13 @@ export default function Quotes() {
     });
   };
 
+  const safeOrders = orders || [];
+
   const stats = {
     total: totalRecords,
     valorTotal:
-      orders.length > 0
-        ? orders.reduce((acc, curr) => acc + Number(curr.finalTotal), 0)
+      safeOrders.length > 0
+        ? safeOrders.reduce((acc, curr) => acc + Number(curr.finalTotal), 0)
         : 0,
   };
 
@@ -261,7 +275,7 @@ export default function Quotes() {
               placeholder="Nome do cliente ou código..."
               value={filters.searchTerm}
               onChange={(e) =>
-                setFilters((prev) => ({ ...prev, searchTerm: e.target.value }))
+                setFilters((prev) => ({ ...prev, searchTerm: e.target.value, page: 1 }))
               }
             />
           </div>
@@ -274,6 +288,7 @@ export default function Quotes() {
                 setFilters((prev) => ({
                   ...prev,
                   status: value as OrderStatusEnum | "all",
+                  page: 1,
                 }))
               }
             >
@@ -319,7 +334,7 @@ export default function Quotes() {
                   mode="single"
                   selected={filters.startDate}
                   onSelect={(date) =>
-                    setFilters((prev) => ({ ...prev, startDate: date }))
+                    setFilters((prev) => ({ ...prev, startDate: date, page: 1 }))
                   }
                 />
               </PopoverContent>
@@ -348,7 +363,7 @@ export default function Quotes() {
                   mode="single"
                   selected={filters.endDate}
                   onSelect={(date) =>
-                    setFilters((prev) => ({ ...prev, endDate: date }))
+                    setFilters((prev) => ({ ...prev, endDate: date, page: 1 }))
                   }
                 />
               </PopoverContent>
@@ -389,7 +404,7 @@ export default function Quotes() {
                     Carregando pedidos...
                   </TableCell>
                 </TableRow>
-              ) : orders.length === 0 ? (
+              ) : safeOrders.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -399,7 +414,7 @@ export default function Quotes() {
                   </TableCell>
                 </TableRow>
               ) : (
-                orders.map((order) => {
+                safeOrders.map((order) => {
                   const statusConfig = STATUS_CONFIG[order.status] || {
                     label: order.status,
                     color: "bg-gray-100 text-gray-800",
@@ -467,13 +482,13 @@ export default function Quotes() {
         </div>
       </Card>
 
-      {meta && orders.length > 0 && (
+      {meta && safeOrders.length > 0 && (
         <Pagination
           pageIndex={meta.page}
           totalCount={meta.total}
           perPage={meta.perPage}
           meta={meta}
-          getData={fetchOrders}
+          getData={(page) => setFilters((prev) => ({ ...prev, page }))}
         />
       )}
     </div>

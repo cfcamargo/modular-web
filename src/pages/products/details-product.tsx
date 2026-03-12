@@ -18,9 +18,9 @@ import {
   AlertDialogDescription,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@radix-ui/react-alert-dialog";
+  AlertDialogFooter,
+} from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
-import { AlertDialogFooter } from "@/components/ui/alert-dialog";
 import { RoleEnum } from "@/utils/enums/RoleEnum";
 
 export default function EditProduct() {
@@ -104,7 +104,7 @@ export default function EditProduct() {
               </AlertDialogDescription>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={() => destroyProduct}>
+                <AlertDialogAction onClick={() => destroyProduct(product!)}>
                   Confirmar
                 </AlertDialogAction>
               </AlertDialogFooter>
