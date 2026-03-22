@@ -8,6 +8,7 @@ import {
   FileText,
   X,
   Copy,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -245,6 +246,14 @@ export function OrderDetails() {
               <Copy className="mr-2 h-4 w-4" />
               Clonar
             </Button>
+            {order?.status === OrderStatusEnum.DRAFT && (
+              <Link to={`/quotes/${order?.id}/edit`}>
+                <Button variant="outline">
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Editar
+                </Button>
+              </Link>
+            )}
             <Button variant="outline" onClick={handlePrint}>
               <Printer className="mr-2 h-4 w-4" />
               Imprimir
@@ -526,7 +535,7 @@ export function OrderDetails() {
 
           <div className="space-y-4 py-4">
             <Select
-              value={selectedStatus}
+              value={selectedStatus as string | undefined}
               onValueChange={(value) =>
                 setSelectedStatus(value as OrderStatusEnum)
               }

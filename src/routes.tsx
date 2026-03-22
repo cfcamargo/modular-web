@@ -16,7 +16,6 @@ import { authApi } from "./api";
 import { useUserLoggedStore } from "@/store/auth/user-logged.ts";
 import { toast } from "sonner";
 import DetailsProduct from "./pages/products/details-product";
-import QuoteList from "./pages/quote/quotes";
 import NewQuote from "./pages/quote/new-quote";
 import { CreateClient } from "./pages/clients/create-client";
 import ClientDetails from "./pages/clients/client-details";
@@ -25,6 +24,7 @@ import ProductionOrders from "./pages/production/production-orders";
 import Quotes from "./pages/quote/quotes";
 import { OrderDetails } from "./pages/quote/quote-details";
 import EditProduct from "./pages/products/edit-product";
+import EditQuote from "./pages/quote/edit-quote";
 
 const checkAuth = async () => {
   useUserLoggedStore.getState().setLoadingUserLoggedData(true);
@@ -68,6 +68,7 @@ export const router = createBrowserRouter([
       { path: "/quotes", element: <Quotes /> },
       { path: "/quotes/create", element: <NewQuote /> },
       { path: "/quotes/:id", element: <OrderDetails /> },
+      { path: "/quotes/:id/edit", element: <EditQuote /> },
     ],
   },
   {

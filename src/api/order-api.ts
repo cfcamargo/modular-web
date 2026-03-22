@@ -23,6 +23,10 @@ export class OrderApi {
     return api.post(baseURL, request);
   };
 
+  updateOrder = async (request: CreateOrderRequest, id: string) => {
+    return api.patch(`${baseURL}/${id}`, request);
+  };
+
   findAll = async (
     request: GetOrdersRequest,
   ): Promise<{
