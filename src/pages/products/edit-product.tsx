@@ -61,9 +61,7 @@ export default function EditProduct() {
           isEditMode={true}
           isEditScreen={true}
           initialData={{
-            ...product,
-            initialStock: product.stockOnHand,
-          }}
+            ...product,}}
         />
       )}
     </>

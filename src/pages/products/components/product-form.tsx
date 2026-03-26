@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/select";
 
 import { ProductRequest } from "@/models/requests/product-request";
-import { ProductResponse } from "@/models/responses/product-response";
 
 export const productSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
@@ -36,18 +35,14 @@ export const productSchema = z.object({
   installmentPrice: z.coerce
     .number({ invalid_type_error: "Informe um valor numérico" })
     .min(0.01, "O preço deve ser maior que zero."),
-
-  initialStock: z.coerce
-    .number({ invalid_type_error: "Informe o estoque" })
-    .int("O estoque deve ser inteiro")
-    .min(0, "O estoque não pode ser negativo."),
-
+    
   unit: z
     .string({ required_error: "Selecione uma unidade" })
     .min(1, "Selecione uma unidade."),
 
   description: z.string().optional(),
 });
+
 
 export type ProductFormSchema = z.infer<typeof productSchema>;
 
@@ -81,7 +76,6 @@ export default function ProductForm({
       name: "",
       price: "" as unknown as number,
       installmentPrice: "" as unknown as number,
-      initialStock: "" as unknown as number,
       description: "",
       unit: "",
     },
@@ -258,6 +252,7 @@ export default function ProductForm({
             </Button>
           </div>
         )}
+        <p>{JSON.stringify(errors)}</p>
       </form>
     </div>
   );

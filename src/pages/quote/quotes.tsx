@@ -121,6 +121,8 @@ export default function Quotes() {
 
       const response = await orderApi.findAll(payload);
 
+      console.log(response)
+
       console.log('Orders API response:', response.data);
 
       const resData = response.data;
